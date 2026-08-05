@@ -10,3 +10,4 @@ build/
 var/yomitan/
 .stage/
 notes/
+.playwright-cli/
