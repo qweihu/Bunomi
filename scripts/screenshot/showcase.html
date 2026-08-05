@@ -73,6 +73,23 @@
     padding: 16px 20px; font-size: 26px; font-weight: 600; letter-spacing: 0.03em;
   }
   .render-box rt { font-size: 0.55em; color: var(--accent); font-weight: 600; }
+  .rows { display: flex; flex-direction: column; gap: 10px; }
+  .row {
+    display: flex; align-items: center; gap: 14px; background: #fbfcff;
+    border: 1px solid var(--line); border-radius: 12px; padding: 12px 16px;
+  }
+  .row .in { font-size: 18px; font-weight: 600; flex: 1; }
+  .row .arrow { color: #c3c9d6; }
+  .row .out { font-size: 15px; color: var(--ink); flex: 1.2; }
+  .row .chip-note { font-size: 12px; color: var(--muted); }
+  .browser { border-radius: 14px; overflow: hidden; border: 1px solid var(--line); background: #fff; }
+  .browser-bar { display: flex; align-items: center; gap: 8px; padding: 10px 14px; background: #eef1f8; border-bottom: 1px solid var(--line); }
+  .browser-bar i { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+  .browser-bar i:nth-child(1) { background: #f87171; }
+  .browser-bar i:nth-child(2) { background: #fbbf24; }
+  .browser-bar i:nth-child(3) { background: #34d399; }
+  .browser-url { font-size: 11px; color: var(--muted); background: #fff; border-radius: 8px; padding: 3px 10px; flex: 1; }
+  .browser-body { padding: 18px 22px; font-size: 24px; line-height: 2.4; font-weight: 600; }
   .flow { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
   .step {
     flex: 1; min-width: 128px; background: #f6f8fd; border: 1px solid var(--line);
@@ -160,6 +177,54 @@
     <div class="render-box"><ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>り<ruby>止<rt>や</rt></ruby>むまでは<ruby>帰<rt>かえ</rt></ruby>れない</div>
   </section>
 
+  <section class="section" id="demo-pair">
+    <div class="section-title"><span class="dot"></span><span data-i18n="pair-title">注音 + 中文翻译</span></div>
+    <div class="section-sub" data-i18n="pair-sub">学习文本：注音结果与逐句翻译对照（翻译交给 $japanese-translation）</div>
+    <div class="rows">
+      <div class="row">
+        <span class="in"><ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>り<ruby>止<rt>や</rt></ruby>むまでは<ruby>帰<rt>かえ</rt></ruby>れない</span>
+        <span class="arrow">→</span>
+        <span class="out" data-i18n="pair-1">直到雨停之前，我无法回去</span>
+      </div>
+      <div class="row">
+        <span class="in"><ruby>新<rt>あたら</rt></ruby>しい<ruby>言葉<rt>ことば</rt></ruby>を<ruby>覚<rt>おぼ</rt></ruby>えるのが<ruby>楽<rt>たの</rt></ruby>しい。</span>
+        <span class="arrow">→</span>
+        <span class="out" data-i18n="pair-2">记住新单词很开心。</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="demo-dict">
+    <div class="section-title"><span class="dot blue"></span><span data-i18n="dict-title">词典审计与专名</span></div>
+    <div class="section-sub" data-i18n="dict-sub">Yomitan 词条：候选读音、标签、专名类别与例句</div>
+    <div class="rows">
+      <div class="row">
+        <span class="in">日本語</span>
+        <span class="arrow">→</span>
+        <span class="out">にほんご <span class="chip-note">[language] [jlptN5] · JMdict</span></span>
+      </div>
+      <div class="row">
+        <span class="in">山田</span>
+        <span class="arrow">→</span>
+        <span class="out">やまだ <span class="chip-note">[surname] · JMnedict 专名</span></span>
+      </div>
+      <div class="row">
+        <span class="in"><ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>する。</span>
+        <span class="arrow">→</span>
+        <span class="out" data-i18n="dict-example">学习日语。</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="demo-html">
+    <div class="section-title"><span class="dot green"></span><span data-i18n="html-title">HTML 输出（--format html）</span></div>
+    <div class="section-sub" data-i18n="html-sub">最小浏览器文档，ruby 原样渲染</div>
+    <div class="browser">
+      <div class="browser-bar"><i></i><i></i><i></i><span class="browser-url">lesson.html</span></div>
+      <div class="browser-body"><ruby>夢<rt>ゆめ</rt></ruby>ならばどれほどよかったでしょう<br><ruby>未<rt>いま</rt></ruby>だにあなたのことを<ruby>夢<rt>ゆめ</rt></ruby>にみる</div>
+    </div>
+  </section>
+
   <section class="section" id="demo-flow">
     <div class="section-title"><span class="dot green"></span><span data-i18n="flow-title">工作流</span></div>
     <div class="section-sub" data-i18n="flow-sub">从输入到导出，每一步都可校验</div>
@@ -192,6 +257,15 @@
       "cli-title": "终端里的 Bunomi",
       "cli-sub": "一行命令，标准输入进来，ruby Markdown 出去",
       "cli-render": "渲染效果",
+      "pair-title": "注音 + 中文翻译",
+      "pair-sub": "学习文本：注音结果与逐句翻译对照（翻译交给 $japanese-translation）",
+      "pair-1": "直到雨停之前，我无法回去",
+      "pair-2": "记住新单词很开心。",
+      "dict-title": "词典审计与专名",
+      "dict-sub": "Yomitan 词条：候选读音、标签、专名类别与例句",
+      "dict-example": "学习日语。",
+      "html-title": "HTML 输出（--format html）",
+      "html-sub": "最小浏览器文档，ruby 原样渲染",
       "flow-title": "工作流",
       "flow-sub": "从输入到导出，每一步都可校验",
       "flow-1": "输入", "flow-1d": "文本或文件",
@@ -214,6 +288,15 @@
       "cli-title": "ターミナルの Bunomi",
       "cli-sub": "標準入力から一行、ruby Markdown が出る",
       "cli-render": "レンダリング結果",
+      "pair-title": "ふりがな＋中国語訳",
+      "pair-sub": "学習テキスト：ふりがなと逐句訳の対照（翻訳は $japanese-translation）",
+      "pair-1": "雨が止むまで帰れない",
+      "pair-2": "新しい言葉を覚えるのは楽しい。",
+      "dict-title": "辞書監査と固有名詞",
+      "dict-sub": "Yomitan エントリ：候補読み・タグ・固有名詞カテゴリ・例文",
+      "dict-example": "日本語を勉強する。",
+      "html-title": "HTML 出力（--format html）",
+      "html-sub": "最小のブラウザドキュメント、ruby をそのまま表示",
       "flow-title": "ワークフロー",
       "flow-sub": "入力から出力まで、各ステップで検証",
       "flow-1": "入力", "flow-1d": "テキストまたはファイル",
@@ -236,6 +319,15 @@
       "cli-title": "Bunomi in the terminal",
       "cli-sub": "One command in, ruby Markdown out",
       "cli-render": "Rendered result",
+      "pair-title": "Furigana + Chinese translation",
+      "pair-sub": "Learning text: annotated lines with line-by-line translation (via $japanese-translation)",
+      "pair-1": "I cannot go back until the rain stops",
+      "pair-2": "Learning new words is fun.",
+      "dict-title": "Dictionary audit & proper nouns",
+      "dict-sub": "Yomitan entries: candidate readings, tags, name categories, examples",
+      "dict-example": "I study Japanese.",
+      "html-title": "HTML output (--format html)",
+      "html-sub": "Minimal browser document; ruby renders as-is",
       "flow-title": "Workflow",
       "flow-sub": "From input to export, every step is validated",
       "flow-1": "Input", "flow-1d": "text or file",

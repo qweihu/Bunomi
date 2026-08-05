@@ -79,11 +79,21 @@ JSON 输出附带逐 token 元数据（词性、辞書形、标准形），可�
 `--conjugations` 附带活用形，或 `--sentences/--sentence-links` 附带 Tatoeba
 例句。
 
+<p align="center">
+  <img src="screenshot/zh/html.png" alt="HTML 输出示例" width="720">
+  <br><sub>HTML 输出（--format html）：最小浏览器文档，ruby 原样渲染</sub>
+</p>
+
 ## 翻译
 
 用户要求翻译时，Bunomi 把翻译交给共享技能 `$japanese-translation`
 （来自 [japanese-language-core](https://github.com/qweihu/japanese-language-core)
 仓库），安装方式：
+
+<p align="center">
+  <img src="screenshot/zh/pair.png" alt="注音与中文翻译对照" width="720">
+  <br><sub>注音 + 中文翻译对照：学习文本的完整呈现</sub>
+</p>
 
 ```bash
 git clone https://github.com/qweihu/japanese-language-core.git
@@ -142,6 +152,11 @@ tests/test_core.py           # 无外部服务的核心测试
 
 Bunomi 将 Yomitan/JMdict 数据作为词典增强和审计来源，Sudachi 仍负责默认的
 上下文读音。需要获取数据时运行：
+
+<p align="center">
+  <img src="screenshot/zh/dict.png" alt="Yomitan 词典审计与专名" width="720">
+  <br><sub>词典审计：候选读音、标签、JMnedict 专名与例句</sub>
+</p>
 
 ```bash
 .venv/bin/python scripts/fetch_yomitan_data.py --extract
