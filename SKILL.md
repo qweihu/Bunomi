@@ -1,11 +1,11 @@
 ---
 name: bunomi
-description: 为普通日语学习文本中的汉字生成可校验的平假名或罗马音振假名，并支持 Markdown、HTML、JSON 输出和用户确认后的安全导出。Use when a user asks to read Japanese kanji, add furigana, annotate ordinary Japanese text, or integrate Japanese ruby output into an Agent conversation. Defer translation to the shared japanese-translation skill; defer lyric retrieval and lyric-specific layout workflows to a lyrics skill such as Utayomi.
+description: 为普通日语学习文本中的汉字生成可校验的平假名或罗马音振假名，并支持 Markdown、HTML、JSON 输出和用户确认后的安全导出。Use when a user asks to read Japanese kanji, add furigana, annotate ordinary Japanese text, or integrate Japanese ruby output into an Agent conversation. Defer translation to the shared japanese-translation skill; defer lyric retrieval and lyric-specific layout workflows to dedicated lyric skills.
 ---
 
 # Bunomi
 
-Use Bunomi for ordinary Japanese learning text. Keep lyric retrieval, lyric translation, and song-specific Markdown layout in Utayomi so the two skills do not compete for the same request.
+Use Bunomi for ordinary Japanese learning text. Keep lyric retrieval, lyric translation, and song-specific Markdown layout in dedicated lyric skills so the skills do not compete for the same request.
 
 ## 翻译请求
 
@@ -34,7 +34,7 @@ dictionary archives unless the user explicitly requests that workflow.
 
 The reusable engine is published from the separate
 `qweihu/japanese-reading-core` repository; install that package when another
-application such as Utayomi needs the same reading contract. Keep Bunomi's
+application needs the same reading contract. Keep Bunomi's
 detection, ruby rendering, and export policy in the application layer.
 
 ## CLI
