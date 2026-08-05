@@ -5,188 +5,117 @@
 <title>Bunomi 效果预览</title>
 <style>
   :root {
-    --ink: #1f2430;
-    --muted: #6b7280;
-    --accent: #e25563;
-    --accent-2: #5b8def;
-    --card: #ffffff;
-    --bg: linear-gradient(160deg, #f7f8fc 0%, #eef1f8 100%);
-    --line: #e5e7ef;
-    --radius: 18px;
+    --ink: #1f2430; --muted: #6b7280; --accent: #e25563; --accent-2: #5b8def;
+    --green: #2fb38b; --card: #ffffff; --line: #e5e7ef;
+    --bg: linear-gradient(160deg, #f7f8fc 0%, #eef1f8 100%); --radius: 18px;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body { background: var(--bg); }
   body {
     font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI",
       "PingFang SC", "Noto Sans CJK SC", "Microsoft YaHei", sans-serif;
-    color: var(--ink);
-    padding: 40px;
-    -webkit-font-smoothing: antialiased;
+    color: var(--ink); padding: 40px; -webkit-font-smoothing: antialiased;
   }
   .section {
-    background: var(--card);
-    border: 1px solid var(--line);
+    background: var(--card); border: 1px solid var(--line);
     border-radius: var(--radius);
     box-shadow: 0 10px 30px rgba(31, 36, 48, 0.08);
-    padding: 28px 32px;
-    margin: 0 0 36px;
-    max-width: 860px;
+    padding: 28px 32px; margin: 0 0 36px; max-width: 860px;
   }
   .section-title {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 17px;
-    font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 10px;
+    font-size: 17px; font-weight: 700; letter-spacing: 0.02em; margin-bottom: 6px;
   }
-  .section-title .dot {
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--accent);
-    box-shadow: 0 0 0 4px rgba(226, 85, 99, 0.15);
-  }
-  .section-title .dot.blue { background: var(--accent-2); box-shadow: 0 0 0 4px rgba(91, 141, 239, 0.15); }
-  .section-title .dot.green { background: #2fb38b; box-shadow: 0 0 0 4px rgba(47, 179, 139, 0.15); }
-  .section-sub {
-    color: var(--muted);
-    font-size: 13px;
-    margin: 0 0 18px 20px;
-  }
+  .section-title .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 0 4px rgba(226,85,99,0.15); }
+  .section-title .dot.blue { background: var(--accent-2); box-shadow: 0 0 0 4px rgba(91,141,239,0.15); }
+  .section-title .dot.green { background: var(--green); box-shadow: 0 0 0 4px rgba(47,179,139,0.15); }
+  .section-sub { color: var(--muted); font-size: 13px; margin: 0 0 18px 20px; }
   ruby { ruby-align: center; }
-  rt {
-    font-size: 0.55em;
-    color: var(--accent);
-    font-weight: 600;
-    letter-spacing: 0.02em;
-  }
-  .sentence {
-    font-size: 30px;
-    line-height: 2.6;
-    font-weight: 600;
-    letter-spacing: 0.04em;
-  }
+  rt { font-size: 0.55em; color: var(--accent); font-weight: 600; letter-spacing: 0.02em; }
+  .sentence { font-size: 30px; line-height: 2.6; font-weight: 600; letter-spacing: 0.04em; }
   .sentence.small { font-size: 24px; line-height: 2.5; }
   .sentence + .sentence { margin-top: 4px; }
   .romaji rt { color: var(--accent-2); }
-  .card {
-    display: flex;
-    align-items: stretch;
-    gap: 22px;
-  }
-  .card-main {
-    min-width: 220px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-  }
-  .card-expression {
-    font-size: 46px;
-    font-weight: 800;
-    letter-spacing: 0.06em;
-    line-height: 1.7;
-  }
+  .card { display: flex; align-items: stretch; gap: 22px; }
+  .card-main { min-width: 220px; display: flex; flex-direction: column; justify-content: center; }
+  .card-expression { font-size: 46px; font-weight: 800; letter-spacing: 0.06em; line-height: 1.7; }
   .card-reading { font-size: 20px; color: var(--muted); margin-top: 4px; }
   .card-pos {
-    display: inline-flex;
-    align-self: flex-start;
-    margin-top: 12px;
-    font-size: 12px;
-    color: #7c3aed;
-    background: #f3edff;
-    border-radius: 999px;
-    padding: 4px 12px;
-    font-weight: 600;
+    display: inline-flex; align-self: flex-start; margin-top: 12px; font-size: 12px;
+    color: #7c3aed; background: #f3edff; border-radius: 999px; padding: 4px 12px; font-weight: 600;
   }
   .card-right { flex: 1; display: flex; flex-direction: column; justify-content: center; gap: 14px; }
-  .card-gloss {
-    font-size: 16px;
-    color: var(--ink);
-    border-left: 4px solid var(--accent);
-    padding-left: 12px;
-  }
+  .card-gloss { font-size: 16px; border-left: 4px solid var(--accent); padding-left: 12px; }
   .chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .chip {
-    font-size: 13px;
-    color: var(--ink);
-    background: #f2f4f9;
-    border: 1px solid var(--line);
-    border-radius: 999px;
-    padding: 5px 12px;
-  }
+  .chip { font-size: 13px; background: #f2f4f9; border: 1px solid var(--line); border-radius: 999px; padding: 5px 12px; }
   .chip b { color: var(--accent); font-weight: 700; margin-right: 6px; }
   pre.json {
-    background: #0f172a;
-    color: #dbe4ff;
-    border-radius: 14px;
-    padding: 20px 24px;
+    background: #0f172a; color: #dbe4ff; border-radius: 14px; padding: 20px 24px;
     font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-    font-size: 13.5px;
-    line-height: 1.65;
-    overflow: hidden;
+    font-size: 13.5px; line-height: 1.65; overflow: hidden; margin: 0;
   }
-  pre.json .k { color: #7dd3fc; }
-  pre.json .s { color: #a7f3d0; }
-  pre.json .n { color: #fbbf24; }
-  .terminal {
-    background: #111827;
-    border-radius: 14px;
-    overflow: hidden;
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.25);
-  }
-  .terminal-bar {
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    padding: 12px 16px;
-    background: #1f2937;
-  }
-  .terminal-bar i {
-    width: 11px; height: 11px; border-radius: 50%;
-    display: inline-block;
-  }
+  pre.json .k { color: #7dd3fc; } pre.json .s { color: #a7f3d0; } pre.json .n { color: #fbbf24; }
+  .terminal { background: #111827; border-radius: 14px; overflow: hidden; box-shadow: 0 12px 30px rgba(15,23,42,0.25); }
+  .terminal-bar { display: flex; align-items: center; gap: 7px; padding: 12px 16px; background: #1f2937; }
+  .terminal-bar i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
   .terminal-bar i:nth-child(1) { background: #f87171; }
   .terminal-bar i:nth-child(2) { background: #fbbf24; }
   .terminal-bar i:nth-child(3) { background: #34d399; }
   .terminal-body {
-    padding: 18px 22px;
-    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
-    font-size: 14.5px;
-    line-height: 1.9;
-    color: #e5e7eb;
+    padding: 18px 22px; font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+    font-size: 14.5px; line-height: 1.9; color: #e5e7eb;
   }
   .terminal-body .prompt { color: #34d399; }
-  .terminal-body .cmd { color: #e5e7eb; }
   .terminal-body .out { color: #fbbf24; white-space: pre-wrap; word-break: break-all; }
+  .render-label { margin: 18px 0 8px; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .render-box {
+    background: #fbfcff; border: 1px solid var(--line); border-radius: 14px;
+    padding: 16px 20px; font-size: 26px; font-weight: 600; letter-spacing: 0.03em;
+  }
+  .render-box rt { font-size: 0.55em; color: var(--accent); font-weight: 600; }
+  .flow { display: flex; align-items: stretch; gap: 10px; flex-wrap: wrap; }
+  .step {
+    flex: 1; min-width: 128px; background: #f6f8fd; border: 1px solid var(--line);
+    border-radius: 14px; padding: 14px 12px; text-align: center;
+  }
+  .step .num {
+    width: 26px; height: 26px; margin: 0 auto 8px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-size: 13px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .step .num.alt { background: var(--accent-2); }
+  .step .name { font-size: 14px; font-weight: 700; }
+  .step .desc { font-size: 11.5px; color: var(--muted); margin-top: 4px; line-height: 1.5; }
+  .flow-arrow { align-self: center; color: #c3c9d6; font-size: 20px; }
 </style>
 </head>
 <body>
 
   <section class="section" id="demo-hiragana">
-    <div class="section-title"><span class="dot"></span>平假名注音（默认）</div>
-    <div class="section-sub">上下文读音：降り止む → ふりやむ；送假名保持在 ruby 外</div>
+    <div class="section-title"><span class="dot"></span><span data-i18n="hiragana-title">平假名注音（默认）</span></div>
+    <div class="section-sub" data-i18n="hiragana-sub">上下文读音：降り止む → ふりやむ；送假名保持在 ruby 外</div>
     <p class="sentence"><ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>り<ruby>止<rt>や</rt></ruby>むまでは<ruby>帰<rt>かえ</rt></ruby>れない</p>
     <p class="sentence small"><ruby>新<rt>あたら</rt></ruby>しい<ruby>言葉<rt>ことば</rt></ruby>を<ruby>覚<rt>おぼ</rt></ruby>えるのが<ruby>楽<rt>たの</rt></ruby>しい。</p>
   </section>
 
   <section class="section" id="demo-romaji">
-    <div class="section-title"><span class="dot blue"></span>罗马音模式（--romaji）</div>
-    <div class="section-sub">所有日文字符输出 Hepburn 罗马音</div>
+    <div class="section-title"><span class="dot blue"></span><span data-i18n="romaji-title">罗马音模式（--romaji）</span></div>
+    <div class="section-sub" data-i18n="romaji-sub">所有日文字符输出 Hepburn 罗马音</div>
     <p class="sentence small romaji"><ruby>日本語<rt>nihongo</rt></ruby><ruby>を<rt>wo</rt></ruby><ruby>勉強<rt>benkyou</rt></ruby><ruby>する<rt>suru</rt></ruby>。</p>
-    <p class="sentence small romaji"><ruby>夢<rt>yume</rt></ruby>ならばどれほどよかったでしょう</p>
+    <p class="sentence small romaji"><ruby>夢<rt>yume</rt></ruby><ruby>なら<rt>nara</rt></ruby><ruby>ば<rt>ba</rt></ruby><ruby>どれ<rt>dore</rt></ruby><ruby>ほど<rt>hodo</rt></ruby><ruby>よかっ<rt>yokatsu</rt></ruby><ruby>た<rt>ta</rt></ruby><ruby>でしょう<rt>deshou</rt></ruby></p>
   </section>
 
   <section class="section" id="demo-card">
-    <div class="section-title"><span class="dot green"></span>学习卡片（JSON 元数据）</div>
-    <div class="section-sub">词性 · 辞書形 · 活用形 · 释义，一次给全</div>
+    <div class="section-title"><span class="dot green"></span><span data-i18n="card-title">学习卡片（JSON 元数据）</span></div>
+    <div class="section-sub" data-i18n="card-sub">词性 · 辞書形 · 活用形 · 释义，一次给全</div>
     <div class="card">
       <div class="card-main">
         <div class="card-expression"><ruby>食<rt>た</rt></ruby>べる</div>
         <div class="card-reading">たべる · taberu</div>
-        <span class="card-pos">動詞・下一段</span>
+        <span class="card-pos" data-i18n="card-pos">動詞・下一段</span>
       </div>
       <div class="card-right">
-        <div class="card-gloss">吃（持续动作的起点）</div>
+        <div class="card-gloss" data-i18n="card-gloss">吃</div>
         <div class="chips">
           <span class="chip"><b>ます</b>食べます</span>
           <span class="chip"><b>ない</b>食べない</span>
@@ -200,8 +129,8 @@
   </section>
 
   <section class="section" id="demo-json">
-    <div class="section-title"><span class="dot"></span>结构化输出（--format json）</div>
-    <div class="section-sub">逐 token 词性、辞書形、标准形，可选活用形</div>
+    <div class="section-title"><span class="dot"></span><span data-i18n="json-title">结构化输出（--format json）</span></div>
+    <div class="section-sub" data-i18n="json-sub">逐 token 词性、辞書形、标准形，可选活用形</div>
     <pre class="json"><span class="k">"tokens"</span>: [
   {
     <span class="k">"orig"</span>: <span class="s">"食べる"</span>,
@@ -218,8 +147,8 @@
   </section>
 
   <section class="section" id="demo-cli">
-    <div class="section-title"><span class="dot blue"></span>终端里的 Bunomi</div>
-    <div class="section-sub">一行命令，标准输入进来，ruby Markdown 出去</div>
+    <div class="section-title"><span class="dot blue"></span><span data-i18n="cli-title">终端里的 Bunomi</span></div>
+    <div class="section-sub" data-i18n="cli-sub">一行命令，标准输入进来，ruby Markdown 出去</div>
     <div class="terminal">
       <div class="terminal-bar"><i></i><i></i><i></i></div>
       <div class="terminal-body">
@@ -227,7 +156,101 @@
         <div class="out">&lt;ruby&gt;雨&lt;rt&gt;あめ&lt;/rt&gt;&lt;/ruby&gt;が&lt;ruby&gt;降&lt;rt&gt;ふ&lt;/rt&gt;&lt;/ruby&gt;り&lt;ruby&gt;止&lt;rt&gt;や&lt;/rt&gt;&lt;/ruby&gt;むまでは&lt;ruby&gt;帰&lt;rt&gt;かえ&lt;/rt&gt;&lt;/ruby&gt;れない</div>
       </div>
     </div>
+    <div class="render-label" data-i18n="cli-render">渲染效果</div>
+    <div class="render-box"><ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>り<ruby>止<rt>や</rt></ruby>むまでは<ruby>帰<rt>かえ</rt></ruby>れない</div>
   </section>
 
+  <section class="section" id="demo-flow">
+    <div class="section-title"><span class="dot green"></span><span data-i18n="flow-title">工作流</span></div>
+    <div class="section-sub" data-i18n="flow-sub">从输入到导出，每一步都可校验</div>
+    <div class="flow">
+      <div class="step"><div class="num">1</div><div class="name" data-i18n="flow-1">输入</div><div class="desc" data-i18n="flow-1d">文本或文件</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="step"><div class="num alt">2</div><div class="name" data-i18n="flow-2">日语检测</div><div class="desc" data-i18n="flow-2d">中文/日语判别</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="step"><div class="num">3</div><div class="name" data-i18n="flow-3">上下文注音</div><div class="desc" data-i18n="flow-3d">Sudachi / PyKakasi</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="step"><div class="num alt">4</div><div class="name" data-i18n="flow-4">ruby 校验</div><div class="desc" data-i18n="flow-4d">原文保真 · 无漏标</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="step"><div class="num">5</div><div class="name" data-i18n="flow-5">输出 / 导出</div><div class="desc" data-i18n="flow-5d">对话或 --output</div></div>
+    </div>
+  </section>
+
+<script>
+  const I18N = {
+    zh: {
+      "hiragana-title": "平假名注音（默认）",
+      "hiragana-sub": "上下文读音：降り止む → ふりやむ；送假名保持在 ruby 外",
+      "romaji-title": "罗马音模式（--romaji）",
+      "romaji-sub": "所有日文字符输出 Hepburn 罗马音",
+      "card-title": "学习卡片（JSON 元数据）",
+      "card-sub": "词性 · 辞書形 · 活用形 · 释义，一次给全",
+      "card-pos": "動詞・下一段",
+      "card-gloss": "吃",
+      "json-title": "结构化输出（--format json）",
+      "json-sub": "逐 token 词性、辞書形、标准形，可选活用形",
+      "cli-title": "终端里的 Bunomi",
+      "cli-sub": "一行命令，标准输入进来，ruby Markdown 出去",
+      "cli-render": "渲染效果",
+      "flow-title": "工作流",
+      "flow-sub": "从输入到导出，每一步都可校验",
+      "flow-1": "输入", "flow-1d": "文本或文件",
+      "flow-2": "日语检测", "flow-2d": "中文/日语判别",
+      "flow-3": "上下文注音", "flow-3d": "Sudachi / PyKakasi",
+      "flow-4": "ruby 校验", "flow-4d": "原文保真 · 无漏标",
+      "flow-5": "输出 / 导出", "flow-5d": "对话或 --output"
+    },
+    ja: {
+      "hiragana-title": "平仮名のふりがな（既定）",
+      "hiragana-sub": "文脈読み：降り止む → ふりやむ、送り仮名は ruby の外",
+      "romaji-title": "ローマ字モード（--romaji）",
+      "romaji-sub": "すべての仮名をヘボン式ローマ字で出力",
+      "card-title": "単語カード（JSON メタデータ）",
+      "card-sub": "品詞・辞書形・活用形・意味を一括で",
+      "card-pos": "動詞・下一段",
+      "card-gloss": "食べる",
+      "json-title": "構造化出力（--format json）",
+      "json-sub": "token ごとの品詞・辞書形・標準形、活用形も",
+      "cli-title": "ターミナルの Bunomi",
+      "cli-sub": "標準入力から一行、ruby Markdown が出る",
+      "cli-render": "レンダリング結果",
+      "flow-title": "ワークフロー",
+      "flow-sub": "入力から出力まで、各ステップで検証",
+      "flow-1": "入力", "flow-1d": "テキストまたはファイル",
+      "flow-2": "日本語判定", "flow-2d": "中国語 / 日本語の判別",
+      "flow-3": "文脈注音", "flow-3d": "Sudachi / PyKakasi",
+      "flow-4": "ruby 検証", "flow-4d": "原文保持・漏れなし",
+      "flow-5": "出力 / 保存", "flow-5d": "会話または --output"
+    },
+    en: {
+      "hiragana-title": "Hiragana furigana (default)",
+      "hiragana-sub": "Contextual readings: 降り止む → ふりやむ; okurigana stays outside ruby",
+      "romaji-title": "Romaji mode (--romaji)",
+      "romaji-sub": "Every kana is rendered in Hepburn romaji",
+      "card-title": "Word card (JSON metadata)",
+      "card-sub": "POS, dictionary form, conjugations and gloss at a glance",
+      "card-pos": "Verb (ichidan)",
+      "card-gloss": "to eat",
+      "json-title": "Structured output (--format json)",
+      "json-sub": "Per-token POS, dictionary form, normalized form, optional conjugations",
+      "cli-title": "Bunomi in the terminal",
+      "cli-sub": "One command in, ruby Markdown out",
+      "cli-render": "Rendered result",
+      "flow-title": "Workflow",
+      "flow-sub": "From input to export, every step is validated",
+      "flow-1": "Input", "flow-1d": "text or file",
+      "flow-2": "Detection", "flow-2d": "Chinese / Japanese",
+      "flow-3": "Annotation", "flow-3d": "Sudachi / PyKakasi",
+      "flow-4": "Ruby check", "flow-4d": "fidelity · no leaks",
+      "flow-5": "Output / Export", "flow-5d": "chat or --output"
+    }
+  };
+  const lang = new URLSearchParams(location.search).get("lang") || "zh";
+  const dict = I18N[lang] || I18N.zh;
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    el.textContent = dict[el.dataset.i18n] || el.textContent;
+  });
+  document.documentElement.lang = lang === "ja" ? "ja" : lang === "en" ? "en" : "zh-CN";
+</script>
 </body>
 </html>

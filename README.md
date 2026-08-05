@@ -18,29 +18,37 @@
 GitHub 的 README 不渲染 `<ruby>` 标签，以下是真实注音效果的渲染图。
 
 <p align="center">
-  <img src="screenshot/hiragana.png" alt="平假名注音示例" width="720">
+  <img src="screenshot/zh/hiragana.png" alt="平假名注音示例" width="720">
   <br><sub>平假名注音：上下文读音（降り止む → ふりやむ）与送假名处理</sub>
 </p>
 
 <p align="center">
-  <img src="screenshot/romaji.png" alt="罗马音模式示例" width="720">
+  <img src="screenshot/zh/romaji.png" alt="罗马音模式示例" width="720">
   <br><sub>罗马音模式（--romaji）：所有日文字符输出 Hepburn 罗马音</sub>
 </p>
 
 <p align="center">
-  <img src="screenshot/card.png" alt="学习卡片示例" width="720">
+  <img src="screenshot/zh/card.png" alt="学习卡片示例" width="720">
   <br><sub>学习卡片：词性、辞書形、活用形与释义一次给全</sub>
 </p>
 
 <p align="center">
-  <img src="screenshot/json.png" alt="JSON 结构化输出示例" width="720">
+  <img src="screenshot/zh/json.png" alt="JSON 结构化输出示例" width="720">
   <br><sub>JSON 输出：逐 token 词性、辞書形、标准形与活用形</sub>
 </p>
 
 <p align="center">
-  <img src="screenshot/cli.png" alt="CLI 终端示例" width="720">
-  <br><sub>终端里的 Bunomi：一行命令，ruby Markdown 直接输出</sub>
+  <img src="screenshot/zh/cli.png" alt="CLI 终端示例" width="720">
+  <br><sub>终端里的 Bunomi：一行命令，ruby Markdown 直接输出，下方是渲染效果</sub>
 </p>
+
+<p align="center">
+  <img src="screenshot/zh/flow.png" alt="工作流示例" width="720">
+  <br><sub>工作流：输入 → 检测 → 注音 → 校验 → 输出/导出，每一步都可校验</sub>
+</p>
+
+**日本語版 / English 版**：同一套六张图在 `screenshot/ja/` 与 `screenshot/en/`，
+生成模板见 `scripts/screenshot/showcase.html`。
 
 ## 给 Agent 用
 
