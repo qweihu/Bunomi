@@ -1,5 +1,7 @@
 # Bunomi
 
+**[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)**
+
 An **Agent-facing Japanese furigana skill**: it decides whether input looks
 like Japanese, adds validated `<ruby>` hiragana/romaji readings to kanji, and
 verifies the result before export. The repository itself is the skill (root

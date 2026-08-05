@@ -1,5 +1,7 @@
 # Bunomi
 
+**[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)**
+
 给 Agent 使用的**日语注音技能**：判断输入是否像日语，为日语汉字生成可校验的
 `<ruby>` 平假名/罗马音振假名，并在导出前校验结果。仓库本身就是技能
 （根目录 `SKILL.md`），CLI 是技能背后的确定性引擎。
