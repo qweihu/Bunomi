@@ -1,0 +1,41 @@
+{
+  "name": "bunomi",
+  "version": "0.1.0",
+  "description": "给 Agent 使用的日语注音技能：为日语汉字生成可校验的平假名/罗马音振假名（ruby），并安全导出",
+  "main": "SKILL.md",
+  "files": [
+    "SKILL.md",
+    "PROMPT.md",
+    "README.md",
+    "agents/*.yaml",
+    "LICENSE",
+    "package.json"
+  ],
+  "scripts": {
+    "test": "PYTHONPATH=src python3 -m unittest discover -s tests -v"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/qweihu/Bunomi.git"
+  },
+  "keywords": [
+    "skill",
+    "prompt",
+    "llm",
+    "codex",
+    "claude-code",
+    "japanese",
+    "furigana",
+    "ruby",
+    "仮名",
+    "振り仮名",
+    "日语",
+    "注音"
+  ],
+  "author": "qweihu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/qweihu/Bunomi/issues"
+  },
+  "homepage": "https://github.com/qweihu/Bunomi#readme"
+}

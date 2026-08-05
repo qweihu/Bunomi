@@ -24,7 +24,7 @@ Bunomi 面向日语初学者，把日文文本中的汉字转换为 HTML `<ruby>
 - 输出前检查 ruby 标签闭合、原文是否被改变、是否仍有未标注汉字。
 - 只有用户显式提供输出路径时才写文件；默认不创建随机文件、不覆盖已有文件。
 - 支持从 Yomitan/JMdict release 获取可登记版本的词典快照，作为词典增强和审计对照；不把第三方词典归档打进默认 Python package。
-- 提供项目内 `skills/bunomi/SKILL.md`，指导 Agent 在对话中呈现结果，并在用户确认路径后导出。
+- 提供根目录 `SKILL.md`（仓库即技能），指导 Agent 在对话中呈现结果，并在用户确认路径后导出。
 - 依赖独立仓库 `japanese-language-core`（Nihongo Core）：包含 reading 与 translation
   两大能力模块，共享翻译技能 `japanese-translation` 从该仓库安装，支持默认简体中文
   和多语言扩展，不与 Bunomi 应用层混在一起。

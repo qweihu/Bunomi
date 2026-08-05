@@ -64,7 +64,7 @@ def run_audit() -> list[tuple[str, bool, str]]:
 
     validator_path = locate_validator()
     if validator_path:
-        validator = run_command([find_validator_python(), str(validator_path), str(ROOT / "skills" / "bunomi")])
+        validator = run_command([find_validator_python(), str(validator_path), str(ROOT)])
         results.append(check("skill-structure", validator.returncode == 0, validator.stdout.strip() or validator.stderr.strip()))
     else:
         results.append(check("skill-structure", False, "skill-creator quick_validate.py is not available"))

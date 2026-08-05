@@ -1,4 +1,0 @@
-interface:
-  display_name: "日语翻译共享能力"
-  short_description: "共享日语翻译能力，Bunomi 与 Utayomi 复用，可扩展多语言"
-  default_prompt: "Use -translation to translate Japanese text with line-by-line structure preservation."
