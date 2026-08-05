@@ -15,42 +15,10 @@
 - **边界**：歌词抓取、翻译与排版交给专门的歌词技能和共享翻译技能
   `$japanese-translation`；Bunomi 只做注音这一件事。
 
-## 效果预览
-
-GitHub 的 README 不渲染 `<ruby>` 标签，以下是真实注音效果的渲染图。
-
 <p align="center">
   <img src="screenshot/zh/hiragana.png" alt="平假名注音示例" width="720">
   <br><sub>平假名注音：上下文读音（降り止む → ふりやむ）与送假名处理</sub>
 </p>
-
-<p align="center">
-  <img src="screenshot/zh/romaji.png" alt="罗马音模式示例" width="720">
-  <br><sub>罗马音模式（--romaji）：所有日文字符输出 Hepburn 罗马音</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/zh/card.png" alt="学习卡片示例" width="720">
-  <br><sub>学习卡片：词性、辞書形、活用形与释义一次给全</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/zh/json.png" alt="JSON 结构化输出示例" width="720">
-  <br><sub>JSON 输出：逐 token 词性、辞書形、标准形与活用形</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/zh/cli.png" alt="CLI 终端示例" width="720">
-  <br><sub>终端里的 Bunomi：一行命令，ruby Markdown 直接输出，下方是渲染效果</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/zh/flow.png" alt="工作流示例" width="720">
-  <br><sub>工作流：输入 → 检测 → 注音 → 校验 → 输出/导出，每一步都可校验</sub>
-</p>
-
-**日本語版 / English 版**：同一套九张图在 `screenshot/ja/` 与 `screenshot/en/`，
-生成模板见 `scripts/screenshot/showcase.html`。
 
 ## 给 Agent 用
 
@@ -62,6 +30,11 @@ GitHub 的 README 不渲染 `<ruby>` 标签，以下是真实注音效果的渲�
 
 Agent 引用 `$bunomi` 即可按 `SKILL.md` 工作流执行；不使用技能框架的环境
 可以直接把 `PROMPT.md` 作为提示词。
+
+<p align="center">
+  <img src="screenshot/zh/flow.png" alt="工作流示例" width="720">
+  <br><sub>工作流：输入 → 检测 → 注音 → 校验 → 输出/导出，每一步都可校验</sub>
+</p>
 
 ## 给开发者用（CLI）
 
@@ -77,14 +50,39 @@ echo "夢ならばどれほどよかったでしょう" | .venv/bin/bunomi
 `--engine pykakasi` 可用于兼容回退；经过审核的短语规则默认启用，可用
 `--no-overrides` 做诊断对比。
 
+<p align="center">
+  <img src="screenshot/zh/cli.png" alt="CLI 终端示例" width="720">
+  <br><sub>终端里的 Bunomi：一行命令，ruby Markdown 直接输出，下方是渲染效果</sub>
+</p>
+
+<p align="center">
+  <img src="screenshot/zh/romaji.png" alt="罗马音模式示例" width="720">
+  <br><sub>罗马音模式（--romaji）：所有日文字符输出 Hepburn 罗马音</sub>
+</p>
+
 JSON 输出附带逐 token 元数据（词性、辞書形、标准形），可加
 `--conjugations` 附带活用形，或 `--sentences/--sentence-links` 附带 Tatoeba
 例句。
+
+### 输出格式
+
+<p align="center">
+  <img src="screenshot/zh/card.png" alt="学习卡片示例" width="720">
+  <br><sub>学习卡片：词性、辞書形、活用形与释义一次给全</sub>
+</p>
+
+<p align="center">
+  <img src="screenshot/zh/json.png" alt="JSON 结构化输出示例" width="720">
+  <br><sub>JSON 输出：逐 token 词性、辞書形、标准形与活用形</sub>
+</p>
 
 <p align="center">
   <img src="screenshot/zh/html.png" alt="HTML 输出示例" width="720">
   <br><sub>HTML 输出（--format html）：最小浏览器文档，ruby 原样渲染</sub>
 </p>
+
+**日本語版 / English 版**：同一套图片在 `screenshot/ja/` 与 `screenshot/en/`，
+生成模板见 `scripts/screenshot/showcase.html`。
 
 ## 翻译
 

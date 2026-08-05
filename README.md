@@ -17,58 +17,10 @@ verifies the result before export. The repository itself is the skill (root
   lyric skills and the shared `$japanese-translation` skill; Bunomi only
   annotates.
 
-## Preview
-
-GitHub's README does not render `<ruby>` tags; the images below show the real
-annotated output.
-
 <p align="center">
   <img src="screenshot/en/hiragana.png" alt="Hiragana furigana" width="720">
   <br><sub>Hiragana furigana: contextual readings (降り止む → ふりやむ) with okurigana outside ruby</sub>
 </p>
-
-<p align="center">
-  <img src="screenshot/en/romaji.png" alt="Romaji mode" width="720">
-  <br><sub>Romaji mode (--romaji): every kana rendered in Hepburn romaji</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/card.png" alt="Word card" width="720">
-  <br><sub>Word card: POS, dictionary form, conjugations and gloss at a glance</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/json.png" alt="JSON output" width="720">
-  <br><sub>JSON output: per-token POS, dictionary form, normalized form and conjugations</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/cli.png" alt="CLI" width="720">
-  <br><sub>Bunomi in the terminal: one command in, ruby Markdown out, with rendered result below</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/pair.png" alt="Furigana + translation" width="720">
-  <br><sub>Annotated lines paired with Chinese translations for learning text</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/dict.png" alt="Dictionary audit" width="720">
-  <br><sub>Dictionary audit: candidate readings, tags, JMnedict names and examples</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/html.png" alt="HTML output" width="720">
-  <br><sub>HTML output (--format html): a minimal browser document, ruby rendered as-is</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/flow.png" alt="Workflow" width="720">
-  <br><sub>Workflow: input → detection → annotation → validation → output/export</sub>
-</p>
-
-**日本語版 / 中文版**: the same nine images live in `screenshot/ja/` and
-`screenshot/zh/`; the generator template is `scripts/screenshot/showcase.html`.
 
 ## For agents
 
@@ -81,6 +33,11 @@ already exists):
 
 Agents reference `$bunomi` and follow the `SKILL.md` workflow; environments
 without a skill framework can use `PROMPT.md` directly.
+
+<p align="center">
+  <img src="screenshot/en/flow.png" alt="Workflow" width="720">
+  <br><sub>Workflow: input → detection → annotation → validation → output/export</sub>
+</p>
 
 ## For developers (CLI)
 
@@ -96,14 +53,39 @@ overwriting requires `--overwrite`. `--engine auto` prefers Sudachi, and
 `--engine pykakasi` is the compatibility fallback. Reviewed phrase overrides
 are enabled by default; use `--no-overrides` for diagnostics.
 
+<p align="center">
+  <img src="screenshot/en/cli.png" alt="CLI" width="720">
+  <br><sub>Bunomi in the terminal: one command in, ruby Markdown out, with rendered result below</sub>
+</p>
+
+<p align="center">
+  <img src="screenshot/en/romaji.png" alt="Romaji mode" width="720">
+  <br><sub>Romaji mode (--romaji): every kana rendered in Hepburn romaji</sub>
+</p>
+
 JSON output carries per-token metadata (POS, dictionary form, normalized
 form) plus optional `--conjugations` and Tatoeba example sentences via
 `--sentences/--sentence-links`.
+
+### Output formats
+
+<p align="center">
+  <img src="screenshot/en/card.png" alt="Word card" width="720">
+  <br><sub>Word card: POS, dictionary form, conjugations and gloss at a glance</sub>
+</p>
+
+<p align="center">
+  <img src="screenshot/en/json.png" alt="JSON output" width="720">
+  <br><sub>JSON output: per-token POS, dictionary form, normalized form and conjugations</sub>
+</p>
 
 <p align="center">
   <img src="screenshot/en/html.png" alt="HTML output" width="720">
   <br><sub>HTML output (--format html): a minimal browser document, ruby rendered as-is</sub>
 </p>
+
+**日本語版 / 中文版**: the same images live in `screenshot/ja/` and
+`screenshot/zh/`; the generator template is `scripts/screenshot/showcase.html`.
 
 ## Translation
 

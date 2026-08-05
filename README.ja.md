@@ -16,57 +16,10 @@ Agent 向けの**日本語ふりがなスキル**です：入力が日本語ら�
 - **境界**：歌詞の取得・翻訳・レイアウトは専用の歌詞スキルと共有翻訳スキル
   `$japanese-translation` に任せ、Bunomi は注音だけを行います。
 
-## プレビュー
-
-GitHub の README は `<ruby>` を描画しないため、実際の注音結果を画像で示します。
-
 <p align="center">
   <img src="screenshot/ja/hiragana.png" alt="平仮名ふりがな" width="720">
   <br><sub>平仮名ふりがな：文脈読み（降り止む → ふりやむ）、送り仮名は ruby の外</sub>
 </p>
-
-<p align="center">
-  <img src="screenshot/ja/romaji.png" alt="ローマ字モード" width="720">
-  <br><sub>ローマ字モード（--romaji）：すべての仮名をヘボン式ローマ字で出力</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/card.png" alt="単語カード" width="720">
-  <br><sub>単語カード：品詞・辞書形・活用形・意味を一括で</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/json.png" alt="JSON 出力" width="720">
-  <br><sub>JSON 出力：token ごとの品詞・辞書形・標準形・活用形</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/cli.png" alt="CLI" width="720">
-  <br><sub>ターミナルの Bunomi：標準入力から一行、ruby Markdown が出て下に描画結果</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/pair.png" alt="ふりがな＋中国語訳" width="720">
-  <br><sub>学習テキスト：ふりがな付き行と中国語訳の対照</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/dict.png" alt="辞書監査" width="720">
-  <br><sub>辞書監査：候補読み・タグ・JMnedict 固有名詞・例文</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/html.png" alt="HTML 出力" width="720">
-  <br><sub>HTML 出力（--format html）：最小のブラウザドキュメント、ruby をそのまま表示</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/flow.png" alt="ワークフロー" width="720">
-  <br><sub>ワークフロー：入力 → 判定 → 注音 → 検証 → 出力/保存</sub>
-</p>
-
-**中文版 / English 版**：同じ 9 枚の画像が `screenshot/zh/` と `screenshot/en/` に
-あります。生成テンプレートは `scripts/screenshot/showcase.html`。
 
 ## Agent での使い方
 
@@ -78,6 +31,11 @@ Codex の既定スキルディレクトリへインストール（既存なら `
 
 Agent は `$bunomi` を参照して `SKILL.md` のワークフローに従います。スキル
 フレームワークがない環境では `PROMPT.md` をそのままプロンプトとして使えます。
+
+<p align="center">
+  <img src="screenshot/ja/flow.png" alt="ワークフロー" width="720">
+  <br><sub>ワークフロー：入力 → 判定 → 注音 → 検証 → 出力/保存</sub>
+</p>
 
 ## 開発者向け（CLI）
 
@@ -93,9 +51,39 @@ echo "夢ならばどれほどよかったでしょう" | .venv/bin/bunomi
 は互換フォールバック。審査済みのフレーズ上書きは既定で有効、`--no-overrides`
 で診断できます。
 
+<p align="center">
+  <img src="screenshot/ja/cli.png" alt="CLI" width="720">
+  <br><sub>ターミナルの Bunomi：標準入力から一行、ruby Markdown が出て下に描画結果</sub>
+</p>
+
+<p align="center">
+  <img src="screenshot/ja/romaji.png" alt="ローマ字モード" width="720">
+  <br><sub>ローマ字モード（--romaji）：すべての仮名をヘボン式ローマ字で出力</sub>
+</p>
+
 JSON 出力には token ごとのメタデータ（品詞・辞書形・標準形）が含まれ、
 `--conjugations` で活用形、`--sentences/--sentence-links` で Tatoeba 例文を
 付与できます。
+
+### 出力形式
+
+<p align="center">
+  <img src="screenshot/ja/card.png" alt="単語カード" width="720">
+  <br><sub>単語カード：品詞・辞書形・活用形・意味を一括で</sub>
+</p>
+
+<p align="center">
+  <img src="screenshot/ja/json.png" alt="JSON 出力" width="720">
+  <br><sub>JSON 出力：token ごとの品詞・辞書形・標準形・活用形</sub>
+</p>
+
+<p align="center">
+  <img src="screenshot/ja/html.png" alt="HTML 出力" width="720">
+  <br><sub>HTML 出力（--format html）：最小のブラウザドキュメント、ruby をそのまま表示</sub>
+</p>
+
+**中文版 / English 版**：同じ画像が `screenshot/zh/` と `screenshot/en/` に
+あります。生成テンプレートは `scripts/screenshot/showcase.html`。
 
 ## 翻訳
 
