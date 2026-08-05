@@ -1,0 +1,128 @@
+[
+  {
+    "id": "dream-basic",
+    "input": "夢ならばどれほどよかったでしょう",
+    "expected_label": "ja",
+    "expected_output": "<ruby>夢<rt>ゆめ</rt></ruby>ならばどれほどよかったでしょう"
+  },
+  {
+    "id": "okurigana-and-compound",
+    "input": "食べると日本語を読む",
+    "expected_label": "ja",
+    "expected_output": "<ruby>食<rt>た</rt></ruby>べると<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>読<rt>よ</rt></ruby>む"
+  },
+  {
+    "id": "compound-and-punctuation",
+    "input": "私は日本語を勉強します。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>私<rt>わたし</rt></ruby>は<ruby>日本語<rt>にほんご</rt></ruby>を<ruby>勉強<rt>べんきょう</rt></ruby>します。"
+  },
+  {
+    "id": "proper-name-and-place",
+    "input": "山田太郎は東京へ行く。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>山田<rt>やまだ</rt></ruby><ruby>太郎<rt>たろう</rt></ruby>は<ruby>東京<rt>とうきょう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>く。"
+  },
+  {
+    "id": "multiple-reading-nama",
+    "input": "今日は生ビールを飲む。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>今日<rt>きょう</rt></ruby>は<ruby>生<rt>なま</rt></ruby>ビールを<ruby>飲<rt>の</rt></ruby>む。"
+  },
+  {
+    "id": "verb-inflection",
+    "input": "彼は学校へ行った。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>学校<rt>がっこう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>った。"
+  },
+  {
+    "id": "lyric-love-line",
+    "input": "愛してると何度も言った。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>愛<rt>あい</rt></ruby>してると<ruby>何度<rt>なんど</rt></ruby>も<ruby>言<rt>い</rt></ruby>った。"
+  },
+  {
+    "id": "lyric-title-like-line",
+    "input": "君の名は。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>君<rt>きみ</rt></ruby>の<ruby>名<rt>な</rt></ruby>は。"
+  },
+  {
+    "id": "learning-multiple-reading-ikiru",
+    "input": "生きる意味を考える。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>生<rt>い</rt></ruby>きる<ruby>意味<rt>いみ</rt></ruby>を<ruby>考<rt>かんが</rt></ruby>える。"
+  },
+  {
+    "id": "repeated-kana-uta",
+    "input": "人気の店で上手に歌う。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>人気<rt>にんき</rt></ruby>の<ruby>店<rt>みせ</rt></ruby>で<ruby>上手<rt>じょうず</rt></ruby>に<ruby>歌<rt>うた</rt></ruby>う。"
+  },
+  {
+    "id": "proper-name-osaka",
+    "input": "佐藤花子は大阪に住んでいる。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>佐藤<rt>さとう</rt></ruby><ruby>花子<rt>はなこ</rt></ruby>は<ruby>大阪<rt>おおさか</rt></ruby>に<ruby>住<rt>す</rt></ruby>んでいる。",
+    "note": "人名与地名同时出现，检查专有名词边界。"
+  },
+  {
+    "id": "lexical-reading-furusato",
+    "input": "故郷を思い出す。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>故郷<rt>こきょう</rt></ruby>を<ruby>思<rt>おも</rt></ruby>い<ruby>出<rt>だ</rt></ruby>す。",
+    "note": "检查复合词与送假名的联合切分。"
+  },
+  {
+    "id": "lyric-kimi-utaou",
+    "input": "君と一緒に歌おう。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>君<rt>きみ</rt></ruby>と<ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>歌<rt>うた</rt></ruby>おう。",
+    "note": "歌词式邀请表达，检查活用后的送假名边界。"
+  },
+  {
+    "id": "long-learning-line",
+    "input": "小さい頃の夢を忘れない。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>小<rt>ちい</rt></ruby>さい<ruby>頃<rt>ころ</rt></ruby>の<ruby>夢<rt>ゆめ</rt></ruby>を<ruby>忘<rt>わす</rt></ruby>れない。"
+  },
+  {
+    "id": "okurigana-place",
+    "input": "行きたい場所へ行く。",
+    "expected_label": "ja",
+    "expected_output": "<ruby>行<rt>い</rt></ruby>きたい<ruby>場所<rt>ばしょ</rt></ruby>へ<ruby>行<rt>い</rt></ruby>く。"
+  },
+  {
+    "id": "multiline-preservation",
+    "input": "日本語\n\n食べる",
+    "expected_label": "ja",
+    "expected_output": "<ruby>日本語<rt>にほんご</rt></ruby>\n\n<ruby>食<rt>た</rt></ruby>べる"
+  },
+  {
+    "id": "mixed-input",
+    "input": "Hello 日本語です",
+    "expected_label": "mixed",
+    "expected_output": "Hello <ruby>日本語<rt>にほんご</rt></ruby>です",
+    "expected_warning": true
+  },
+  {
+    "id": "contextual-reading-rain-stop",
+    "input": "雨が降り止むまでは帰れない",
+    "expected_label": "ja",
+    "expected_output": "<ruby>雨<rt>あめ</rt></ruby>が<ruby>降<rt>ふ</rt></ruby>り<ruby>止<rt>や</rt></ruby>むまでは<ruby>帰<rt>かえ</rt></ruby>れない",
+    "blocking": true,
+    "note": "降り止む is a contextual compound; this catches dictionary segmentation errors."
+  },
+  {
+    "id": "ambiguous-cjk",
+    "input": "日本語",
+    "expected_label": "ambiguous",
+    "expected_error": "输入只有汉字"
+  },
+  {
+    "id": "non-japanese",
+    "input": "This is English.",
+    "expected_label": "non-ja",
+    "expected_error": "输入不像日语"
+  }
+]

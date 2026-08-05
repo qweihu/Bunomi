@@ -1,0 +1,16 @@
+[
+  {
+    "id": "context-furiyamu",
+    "phrase": "降り止む",
+    "reading": "ふりやむ",
+    "romaji": "furiyamu",
+    "reason": "Sudachi context reading for the compound 降り止む; prevents independent readings おり + とむ."
+  },
+  {
+    "id": "beginner-watashi-wa",
+    "phrase": "私は",
+    "reading": "わたしは",
+    "romaji": "watashiwa",
+    "reason": "Common conversational reading for the beginner sample 私は; keeps the formal alternative わたくし available outside this phrase."
+  }
+]
