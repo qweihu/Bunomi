@@ -79,7 +79,8 @@ Installation pulls `japanese-language-core` pinned at `v0.4.0` with its
 development of both repositories:
 
 ```bash
-.venv/bin/python -m pip install -e "/Users/qwei/Coding/japanese-language-core[reading]"
+git clone https://github.com/qweihu/japanese-language-core.git ../japanese-language-core
+.venv/bin/python -m pip install -e "../japanese-language-core[reading]"
 .venv/bin/python -m pip install -e . --no-deps
 ```
 

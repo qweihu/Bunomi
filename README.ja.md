@@ -75,7 +75,8 @@ python3 -m venv .venv
 両リポジトリをローカル開発する場合：
 
 ```bash
-.venv/bin/python -m pip install -e "/Users/qwei/Coding/japanese-language-core[reading]"
+git clone https://github.com/qweihu/japanese-language-core.git ../japanese-language-core
+.venv/bin/python -m pip install -e "../japanese-language-core[reading]"
 .venv/bin/python -m pip install -e . --no-deps
 ```
 
