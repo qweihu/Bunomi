@@ -112,12 +112,29 @@ def run_audit() -> list[tuple[str, bool, str]]:
         passed = cli.returncode != 0 and case["expected_error"] in cli.stderr
         results.append(check(f"cli-{case_id}", passed, cli.stderr.strip() or "expected CLI error"))
 
-    sudachi_cli = run_command([sys.executable, "-m", "bunomi", "降り止む", "--engine", "sudachi", "--format", "json"])
-    sudachi_engine_ok = sudachi_cli.returncode == 0 and '"engine": "sudachi"' in sudachi_cli.stdout
-    results.append(check("engine-sudachi-selection", sudachi_engine_ok, sudachi_cli.stdout.strip() or sudachi_cli.stderr.strip()))
-    pykakasi_cli = run_command([sys.executable, "-m", "bunomi", "日本語", "--force", "--engine", "pykakasi", "--format", "json"])
-    pykakasi_engine_ok = pykakasi_cli.returncode == 0 and '"engine": "pykakasi"' in pykakasi_cli.stdout
-    results.append(check("engine-pykakasi-fallback", pykakasi_engine_ok, pykakasi_cli.stdout.strip() or pykakasi_cli.stderr.strip()))
+        if "expected_force_output" in case:
+            forced = run_command(
+                [sys.executable, "-m", "bunomi", "--assume-japanese", case["input"]]
+            )
+            force_ok = (
+                forced.returncode == 0
+                and case["expected_force_output"] in forced.stdout
+                and "已绕过日语检测" in forced.stderr
+            )
+            results.append(
+                check(
+                    f"cli-assume-{case_id}",
+                    force_ok,
+                    forced.stdout.strip() or forced.stderr.strip(),
+                )
+            )
+
+    direct_cli = run_command([sys.executable, "-m", "bunomi", "日本語を読む"])
+    direct_ok = direct_cli.returncode == 0 and "<ruby>日本語<rt>にほんご</rt></ruby>" in direct_cli.stdout
+    results.append(check("cli-direct-ruby", direct_ok, direct_cli.stdout.strip() or direct_cli.stderr.strip()))
+    html_cli = run_command([sys.executable, "-m", "bunomi", "日本語を読む", "--format", "html"])
+    html_ok = html_cli.returncode == 0 and "<!doctype html>" in html_cli.stdout
+    results.append(check("cli-html-format", html_ok, html_cli.stdout.strip() or html_cli.stderr.strip()))
 
     with tempfile.TemporaryDirectory(prefix="bunomi-audit-") as temp_directory:
         temp_root = Path(temp_directory)
@@ -139,15 +156,12 @@ def run_audit() -> list[tuple[str, bool, str]]:
                 skill_install.stdout.strip() or skill_install.stderr.strip(),
             )
         )
-        output_path = temp_root / "nested" / "lesson.md"
-        no_parent = run_command([sys.executable, "-m", "bunomi", "日本語を読む", "--output", str(output_path)])
-        results.append(check("export-parent-guard", no_parent.returncode == 2 and not output_path.exists(), no_parent.stderr.strip()))
-        create_parent = run_command(
-            [sys.executable, "-m", "bunomi", "日本語を読む", "--output", str(output_path), "--create-parent"]
-        )
-        results.append(check("export-create-parent", create_parent.returncode == 0 and output_path.exists(), create_parent.stderr.strip()))
-        no_overwrite = run_command([sys.executable, "-m", "bunomi", "日本語を読む", "--output", str(output_path)])
-        results.append(check("export-overwrite-guard", no_overwrite.returncode == 2, no_overwrite.stderr.strip()))
+        source_path = temp_root / "lesson.txt"
+        source_path.write_text("日本語を読む", encoding="utf-8")
+        file_cli = run_command([sys.executable, "-m", "bunomi", "--file", str(source_path)])
+        generated = list(temp_root.glob("lesson.*.html"))
+        file_ok = file_cli.returncode == 0 and len(generated) == 1 and generated[0].is_file()
+        results.append(check("file-timestamp-output", file_ok, file_cli.stderr.strip() or file_cli.stdout.strip()))
 
     return results
 

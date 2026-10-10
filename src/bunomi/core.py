@@ -20,17 +20,14 @@ from japanese_language_core.reading import (
     ReadingToken,
     PykakasiEngine,
     SudachiEngine,
+    align_reading,
     create_engine,
-    to_hiragana,
 )
-
-_to_hiragana = to_hiragana
 
 
 KANJI_RE = re.compile(r"[一-龯々〆ヵヶ\u3400-\u4dbf\U00020000-\U0002ffff]")
 HIRAGANA_RE = re.compile(r"[ぁ-ゖヷ-ヺ]")
 KATAKANA_RE = re.compile(r"[ァ-ヺヽヾー]")
-KANA_RUN_RE = re.compile(r"[ぁ-ゖァ-ヺヽヾー]+")
 RUBY_RE = re.compile(r"<ruby>(.*?)<rt>(.*?)</rt></ruby>", re.DOTALL)
 JAPANESE_PUNCTUATION = set("。、，．！？「」『』【】〈〉《》〔〕・〜～…；：")
 
@@ -77,11 +74,6 @@ class AnnotationResult:
     engine: str = ""
     tokens: tuple[ReadingToken, ...] = ()
     overrides_applied: tuple[str, ...] = ()
-    dictionary_matches: tuple[dict[str, object], ...] = ()
-    dictionary_sources: tuple[str, ...] = ()
-    dictionary_term_count: int = 0
-    dictionary_kanji_count: int = 0
-    dictionary_kanji_matches: tuple[dict[str, object], ...] = ()
 
 
 def is_kanji(char: str) -> bool:
@@ -108,10 +100,13 @@ def _is_kana(char: str) -> bool:
 def detect_language(text: str) -> DetectionResult:
     """Classify text without claiming that CJK-only text is Japanese.
 
-    A kana or Japanese punctuation signal is required for a confident Japanese
-    classification. This avoids silently annotating Chinese text with a
-    Japanese dictionary reading. Callers can explicitly override this with
-    ``force=True`` at the CLI layer when the context is known.
+    Kana is required because common punctuation and Han characters are
+    shared with Chinese. For inputs with at least four Han characters, kana
+    must make up at least one quarter of the Han count; sparse-kana text is
+    ambiguous. This is a script heuristic, not language identification, and
+    cannot separate Chinese and Japanese spans that share Han characters.
+    A lower-level caller with known context may use ``force=True``; the CLI
+    does not expose that escape hatch.
     """
 
     japanese_chars = 0
@@ -145,7 +140,8 @@ def detect_language(text: str) -> DetectionResult:
         return DetectionResult("non-ja", 0.0, 0, 0, 0, non_japanese_letters)
 
     score = japanese_chars / max(meaningful_chars + punctuation_chars, 1)
-    if kana_chars == 0 and punctuation_chars == 0:
+    sparse_kana = kanji_chars >= 4 and kana_chars * 4 < kanji_chars
+    if kana_chars == 0 or sparse_kana:
         label = "ambiguous"
     elif score >= 0.6:
         label = "ja"
@@ -173,66 +169,6 @@ def _ruby(surface: str, reading: str) -> str:
     return f"<ruby>{_escape(surface)}<rt>{_escape(reading)}</rt></ruby>"
 
 
-def _render_hiragana_token(token: ReadingToken) -> str:
-    surface = token.orig
-    reading = _to_hiragana(token.hira)
-    if not has_kanji(surface):
-        return _escape(surface)
-    if not reading:
-        return _escape(surface)
-
-    # Align kana runs in the surface with the same runs in the reading. This
-    # keeps okurigana outside ruby, e.g. 食べる -> <ruby>食<rt>た</rt></ruby>べる.
-    kana_runs = list(KANA_RUN_RE.finditer(surface))
-    if not kana_runs:
-        return _ruby(surface, reading)
-
-    pieces: list[str] = []
-    surface_cursor = 0
-    reading_cursor = 0
-    for kana_match in kana_runs:
-        before = surface[surface_cursor : kana_match.start()]
-        if before:
-            if has_kanji(before):
-                kana_hint = _to_hiragana(kana_match.group(0))
-                reading_index = reading.find(kana_hint, reading_cursor)
-                while reading_index >= 0 and reading_index <= reading_cursor:
-                    reading_index = reading.find(kana_hint, reading_index + 1)
-                # A repeated kana can occur at the beginning of a reading,
-                # e.g. 歌う -> うたう. When a kanji precedes the kana, the
-                # first occurrence cannot be the okurigana boundary; choose
-                # a later occurrence or fall back to a whole-word ruby.
-                if reading_index < 0 or reading_index <= reading_cursor:
-                    return _ruby(surface, reading)
-                pieces.append(_ruby(before, reading[reading_cursor:reading_index]))
-                reading_cursor = reading_index
-            else:
-                pieces.append(_escape(before))
-        kana_text = kana_match.group(0)
-        pieces.append(_escape(kana_text))
-        kana_hint = _to_hiragana(kana_text)
-        if reading.startswith(kana_hint, reading_cursor):
-            reading_cursor += len(kana_hint)
-        else:
-            reading_index = reading.find(kana_hint, reading_cursor)
-            if reading_index < 0:
-                return _ruby(surface, reading)
-            reading_cursor = reading_index + len(kana_hint)
-        surface_cursor = kana_match.end()
-
-    after = surface[surface_cursor:]
-    if after:
-        if has_kanji(after):
-            if reading_cursor >= len(reading):
-                return _ruby(surface, reading)
-            pieces.append(_ruby(after, reading[reading_cursor:]))
-        else:
-            pieces.append(_escape(after))
-    if not pieces:
-        return _ruby(surface, reading)
-    return "".join(pieces)
-
-
 def render_token(token: ReadingToken, mode: str = "hiragana") -> str:
     """Render one engine token as escaped text or a ruby element."""
 
@@ -242,7 +178,19 @@ def render_token(token: ReadingToken, mode: str = "hiragana") -> str:
         if has_japanese_script(token.orig) and token.hepburn:
             return _ruby(token.orig, token.hepburn)
         return _escape(token.orig)
-    return _render_hiragana_token(token)
+    reading = token.hira
+    if not has_kanji(token.orig) or not reading:
+        return _escape(token.orig)
+
+    parts = align_reading(token.orig, reading)
+    if any(has_kanji(surface) and not part_reading for surface, part_reading in parts):
+        parts = [(token.orig, reading)]
+    return "".join(
+        _ruby(surface, part_reading)
+        if part_reading and has_kanji(surface)
+        else _escape(surface)
+        for surface, part_reading in parts
+    )
 
 
 def validate_annotation(source: str, annotated: str) -> ValidationResult:
@@ -296,7 +244,6 @@ def annotate_text(
     engine_name: str = "auto",
     force: bool = False,
     use_overrides: bool = True,
-    dictionary=None,
 ) -> AnnotationResult:
     """Annotate text and validate the result before returning it."""
 
@@ -306,9 +253,9 @@ def annotate_text(
     if not force and detection.label in {"non-ja", "ambiguous"}:
         if detection.label == "ambiguous":
             raise JapaneseDetectionError(
-                "输入只有汉字，无法可靠判断是日语；确认是日语后请使用 --force"
+                "日语信号不足，无法可靠判断输入是否为日语；请提供明确的日语文本"
             )
-        raise JapaneseDetectionError("输入不像日语文本，请检查内容或使用 --force")
+        raise JapaneseDetectionError("输入不像日语文本，请检查内容")
     try:
         active_engine = engine or create_engine(engine_name)
         overrides = ()
@@ -329,36 +276,6 @@ def annotate_text(
     if force and detection.label in {"non-ja", "ambiguous"}:
         warnings.append("已绕过日语检测，请确认汉字读音属于日语")
     applied = tuple(item.id for item in overrides if item.phrase in text)
-    dictionary_matches: tuple[dict[str, object], ...] = ()
-    dictionary_sources: tuple[str, ...] = ()
-    dictionary_term_count = 0
-    dictionary_kanji_count = 0
-    dictionary_kanji_matches: tuple[dict[str, object], ...] = ()
-    if dictionary is not None:
-        dictionary_sources = tuple(getattr(dictionary, "sources", ()))
-        dictionary_term_count = int(getattr(dictionary, "term_count", 0))
-        dictionary_kanji_count = int(getattr(dictionary, "kanji_count", 0))
-        matches = []
-        for token in active_tokens:
-            if not token.hira or not token.orig or not has_kanji(token.orig):
-                continue
-            match = dictionary.audit(token.orig, _to_hiragana(token.hira))
-            if match is not None:
-                matches.append(match.as_dict())
-        dictionary_matches = tuple(matches)
-        kanji_matches: list[dict[str, object]] = []
-        seen_kanji: set[tuple[str, str]] = set()
-        for token in active_tokens:
-            for character in token.orig:
-                if not has_kanji(character):
-                    continue
-                for item in dictionary.kanji_lookup(character):
-                    key = (item.source, item.character)
-                    if key in seen_kanji:
-                        continue
-                    seen_kanji.add(key)
-                    kanji_matches.append(item.as_dict())
-        dictionary_kanji_matches = tuple(kanji_matches)
     return AnnotationResult(
         text,
         annotated,
@@ -368,9 +285,4 @@ def annotate_text(
         getattr(active_engine, "name", active_engine.__class__.__name__),
         tuple(active_tokens),
         applied,
-        dictionary_matches,
-        dictionary_sources,
-        dictionary_term_count,
-        dictionary_kanji_count,
-        dictionary_kanji_matches,
     )

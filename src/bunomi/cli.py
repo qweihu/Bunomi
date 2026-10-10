@@ -3,16 +3,12 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 from pathlib import Path
-import json
 import sys
-
-from japanese_language_core.reading import conjugate
-from japanese_language_core.sentences import SentenceBank
 
 from . import __version__
 from .core import BunomiError, EngineUnavailableError, annotate_text
-from .yomitan import YomitanDataError, load_yomitan_dictionary
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -24,30 +20,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("-f", "--file", help="从 UTF-8 文本文件读取")
     parser.add_argument("-r", "--romaji", action="store_true", help="使用罗马音标注")
     parser.add_argument(
-        "--engine",
-        choices=("auto", "sudachi", "pykakasi"),
-        default="auto",
-        help="读音引擎，默认 auto（优先 Sudachi，缺失时回退 PyKakasi）",
-    )
-    parser.add_argument("--no-overrides", action="store_true", help="禁用已审核的短语读音覆盖规则")
-    parser.add_argument(
-        "--dictionary-dir",
-        help="可选的 Yomitan 词典目录或 var/yomitan/extracted；只用于 JSON 审计增强",
+        "--assume-japanese",
+        action="store_true",
+        help="仅在你确认文本为日语时使用；跳过中日汉字歧义检查",
     )
     parser.add_argument(
         "--format",
-        choices=("markdown", "html", "json"),
-        default="markdown",
-        help="输出格式，默认 markdown",
+        choices=("markdown", "html"),
+        default=None,
+        help="输出格式；直接文本默认输出 Ruby 内容，--file 默认生成 HTML",
     )
-    parser.add_argument("-o", "--output", help="明确指定输出文件；省略时只输出到 stdout")
-    parser.add_argument("--overwrite", action="store_true", help="允许覆盖已存在的输出文件")
-    parser.add_argument("--create-parent", action="store_true", help="输出目录不存在时创建目录")
-    parser.add_argument("--conjugations", action="store_true", help="JSON 输出附带辞書形的常用活用形")
-    parser.add_argument("--sentences", help="可选的 Tatoeba 日语句表 TSV（JSON 输出附带例句）")
-    parser.add_argument("--sentence-links", help="可选的 Tatoeba 链接 TSV（配合 --sentences）")
-    parser.add_argument("--force", action="store_true", help="绕过日语检测；仅在确认输入是日语时使用")
-    parser.add_argument("-q", "--quiet", action="store_true", help="导出文件时不打印保存提示")
     parser.add_argument("--version", action="version", version=__version__)
     return parser
 
@@ -76,73 +58,18 @@ def _render_html(annotated: str) -> str:
     )
 
 
-def _render_json(
-    result,
-    mode: str,
-    *,
-    conjugations: bool = False,
-    examples: dict[str, list[dict[str, object]]] | None = None,
-) -> str:
-    token_payload = []
-    for token in result.tokens:
-        item = {
-            "orig": token.orig,
-            "hira": token.hira,
-            "hepburn": token.hepburn,
-            "part_of_speech": token.part_of_speech,
-            "dictionary_form": token.dictionary_form,
-            "normalized_form": token.normalized_form,
-        }
-        if conjugations and token.dictionary_form:
-            item["conjugations"] = conjugate(token.dictionary_form)
-        token_payload.append(item)
-    payload = {
-        "language": {
-            "label": result.detection.label,
-            "score": result.detection.score,
-            "japanese_chars": result.detection.japanese_chars,
-            "kana_chars": result.detection.kana_chars,
-            "kanji_chars": result.detection.kanji_chars,
-        },
-        "mode": mode,
-        "engine": result.engine,
-        "annotated": result.annotated,
-        "tokens": token_payload,
-        "ruby_count": result.validation.ruby_count,
-        "warnings": list(result.warnings),
-        "overrides_applied": list(result.overrides_applied),
-        "dictionary": {
-            "enabled": bool(result.dictionary_sources),
-            "sources": list(result.dictionary_sources),
-            "term_count": result.dictionary_term_count,
-            "kanji_count": result.dictionary_kanji_count,
-            "matches": list(result.dictionary_matches),
-            "kanji_matches": list(result.dictionary_kanji_matches),
-        },
-    }
-    if examples:
-        payload["examples"] = examples
-    return json.dumps(payload, ensure_ascii=False, indent=2) + "\n"
+def _next_file_target(source: Path, suffix: str) -> Path:
+    stamp = datetime.now().astimezone().strftime("%Y%m%d-%H%M%S")
+    target = source.with_name(f"{source.stem}.{stamp}{suffix}")
+    counter = 2
+    while target.exists():
+        target = source.with_name(f"{source.stem}.{stamp}-{counter}{suffix}")
+        counter += 1
+    return target
 
 
-def _write_output(content: str, raw_path: str, *, overwrite: bool, create_parent: bool) -> Path:
-    if raw_path == "-":
-        print(content, end="")
-        return Path("-")
-    target = Path(raw_path).expanduser().resolve()
-    if target.exists() and target.is_dir():
-        raise BunomiError(f"输出路径是目录，请指定具体文件: {target}")
-    if not target.parent.exists():
-        if not create_parent:
-            raise BunomiError(
-                f"输出目录不存在: {target.parent}；确认目录后重试，或加 --create-parent"
-            )
-        try:
-            target.parent.mkdir(parents=True, exist_ok=True)
-        except OSError as exc:
-            raise BunomiError(f"无法创建输出目录: {target.parent}: {exc}") from exc
-    if target.exists() and not overwrite:
-        raise BunomiError(f"输出文件已存在，为避免覆盖请换路径或加 --overwrite: {target}")
+def _write_file_output(content: str, source: Path, suffix: str) -> Path:
+    target = _next_file_target(source, suffix)
     try:
         target.write_text(content, encoding="utf-8")
     except OSError as exc:
@@ -155,68 +82,24 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     try:
         source = _read_input(args)
+        source_path = Path(args.file).expanduser().resolve() if args.file else None
+        output_format = args.format or ("html" if source_path else "markdown")
         mode = "romaji" if args.romaji else "hiragana"
-        dictionary = None
-        if args.dictionary_dir:
-            try:
-                dictionary = load_yomitan_dictionary(args.dictionary_dir)
-            except YomitanDataError as exc:
-                raise BunomiError(str(exc)) from exc
         result = annotate_text(
             source,
             mode=mode,
-            engine_name=args.engine,
-            force=args.force,
-            use_overrides=not args.no_overrides,
-            dictionary=dictionary,
+            force=args.assume_japanese,
         )
-        if args.format == "markdown":
+        for warning in result.warnings:
+            print(f"bunomi: warning: {warning}", file=sys.stderr)
+        if output_format == "markdown":
             rendered = result.annotated
-        elif args.format == "html":
-            rendered = _render_html(result.annotated)
         else:
-            examples = None
-            if args.sentences or args.sentence_links:
-                if not (args.sentences and args.sentence_links):
-                    raise BunomiError("--sentences 与 --sentence-links 必须同时提供")
-                try:
-                    bank = SentenceBank.from_tatoeba(
-                        args.sentences, args.sentence_links
-                    )
-                except OSError as exc:
-                    raise BunomiError(f"无法读取句库文件: {exc}") from exc
-                examples = {}
-                for token in result.tokens:
-                    surface = token.orig.strip()
-                    if not surface or surface in examples:
-                        continue
-                    hits = bank.lookup(surface)
-                    if hits:
-                        examples[surface] = [
-                            {
-                                "text": sentence.text,
-                                "translations": [
-                                    t.text
-                                    for t in bank.translations(sentence.id)
-                                ],
-                            }
-                            for sentence in hits[:3]
-                        ]
-            rendered = _render_json(
-                result,
-                mode,
-                conjugations=args.conjugations,
-                examples=examples,
-            )
-        if args.output:
-            target = _write_output(
-                rendered,
-                args.output,
-                overwrite=args.overwrite,
-                create_parent=args.create_parent,
-            )
-            if target != Path("-") and not args.quiet:
-                print(f"处理完成！已保存：{target}", file=sys.stderr)
+            rendered = _render_html(result.annotated)
+        if source_path:
+            suffix = ".html" if output_format == "html" else ".md"
+            target = _write_file_output(rendered, source_path, suffix)
+            print(f"处理完成！已保存：{target}", file=sys.stderr)
         else:
             print(rendered, end="" if rendered.endswith("\n") else "\n")
         return 0

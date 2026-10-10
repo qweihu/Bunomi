@@ -1,9 +1,9 @@
 [
   {
     "id": "dream-basic",
-    "input": "夢ならばどれほどよかったでしょう",
+    "input": "夢の中で星を見た。",
     "expected_label": "ja",
-    "expected_output": "<ruby>夢<rt>ゆめ</rt></ruby>ならばどれほどよかったでしょう"
+    "expected_output": "<ruby>夢<rt>ゆめ</rt></ruby>の<ruby>中<rt>なか</rt></ruby>で<ruby>星<rt>ほし</rt></ruby>を<ruby>見<rt>み</rt></ruby>た。"
   },
   {
     "id": "okurigana-and-compound",
@@ -36,16 +36,16 @@
     "expected_output": "<ruby>彼<rt>かれ</rt></ruby>は<ruby>学校<rt>がっこう</rt></ruby>へ<ruby>行<rt>い</rt></ruby>った。"
   },
   {
-    "id": "lyric-love-line",
-    "input": "愛してると何度も言った。",
+    "id": "ordinary-expression",
+    "input": "感情を言葉で伝える。",
     "expected_label": "ja",
-    "expected_output": "<ruby>愛<rt>あい</rt></ruby>してると<ruby>何度<rt>なんど</rt></ruby>も<ruby>言<rt>い</rt></ruby>った。"
+    "expected_output": "<ruby>感情<rt>かんじょう</rt></ruby>を<ruby>言葉<rt>ことば</rt></ruby>で<ruby>伝<rt>つた</rt></ruby>える。"
   },
   {
-    "id": "lyric-title-like-line",
-    "input": "君の名は。",
+    "id": "ordinary-memory",
+    "input": "名前を覚えた。",
     "expected_label": "ja",
-    "expected_output": "<ruby>君<rt>きみ</rt></ruby>の<ruby>名<rt>な</rt></ruby>は。"
+    "expected_output": "<ruby>名前<rt>なまえ</rt></ruby>を<ruby>覚<rt>おぼ</rt></ruby>えた。"
   },
   {
     "id": "learning-multiple-reading-ikiru",
@@ -74,11 +74,11 @@
     "note": "检查复合词与送假名的联合切分。"
   },
   {
-    "id": "lyric-kimi-utaou",
-    "input": "君と一緒に歌おう。",
+    "id": "ordinary-music",
+    "input": "友人と一緒に歌を聞いた。",
     "expected_label": "ja",
-    "expected_output": "<ruby>君<rt>きみ</rt></ruby>と<ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>歌<rt>うた</rt></ruby>おう。",
-    "note": "歌词式邀请表达，检查活用后的送假名边界。"
+    "expected_output": "<ruby>友人<rt>ゆうじん</rt></ruby>と<ruby>一緒<rt>いっしょ</rt></ruby>に<ruby>歌<rt>うた</rt></ruby>を<ruby>聞<rt>き</rt></ruby>いた。",
+    "note": "普通学习文本，检查词语边界和活用后的送假名。"
   },
   {
     "id": "long-learning-line",
@@ -117,7 +117,8 @@
     "id": "ambiguous-cjk",
     "input": "日本語",
     "expected_label": "ambiguous",
-    "expected_error": "输入只有汉字"
+    "expected_error": "日语信号不足",
+    "expected_force_output": "<ruby>日本語<rt>にほんご</rt></ruby>"
   },
   {
     "id": "non-japanese",

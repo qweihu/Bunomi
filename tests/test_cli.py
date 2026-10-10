@@ -1,5 +1,4 @@
 import io
-import json
 from contextlib import redirect_stderr, redirect_stdout
 from pathlib import Path
 import tempfile
@@ -27,94 +26,25 @@ class CLITests(unittest.TestCase):
         self.assertIn("<!doctype html>", html)
         self.assertIn('<main class="bunomi">', html)
 
-        status, raw_json, _ = self.invoke(["日本語を読む", "--format", "json"])
-        self.assertEqual(status, 0)
-        payload = json.loads(raw_json)
-        self.assertEqual(payload["language"]["label"], "ja")
-        self.assertEqual(payload["ruby_count"], 2)
+    def test_only_user_facing_formats_are_available(self):
+        with self.assertRaises(SystemExit):
+            self.invoke(["日本語を読む", "--format", "json"])
+        with self.assertRaises(SystemExit):
+            self.invoke(["日本語を読む", "--engine", "sudachi"])
 
-        status, raw_json, _ = self.invoke(["降り止む", "--engine", "sudachi", "--format", "json"])
-        self.assertEqual(status, 0)
-        self.assertEqual(json.loads(raw_json)["engine"], "sudachi")
-
-        status, raw_json, _ = self.invoke(["日本語", "--force", "--engine", "pykakasi", "--format", "json"])
-        self.assertEqual(status, 0)
-        self.assertEqual(json.loads(raw_json)["engine"], "pykakasi")
-
-    def test_json_contains_token_metadata(self):
-        status, raw_json, _ = self.invoke(
-            ["降り止む", "--engine", "sudachi", "--format", "json"]
-        )
-        self.assertEqual(status, 0)
-        payload = json.loads(raw_json)
-        tokens = payload["tokens"]
-        self.assertTrue(tokens)
-        for token in tokens:
-            self.assertIn("part_of_speech", token)
-            self.assertIn("dictionary_form", token)
-            self.assertIn("normalized_form", token)
-
-    def test_json_conjugations(self):
-        status, raw_json, _ = self.invoke(
-            ["食べる", "--engine", "sudachi", "--format", "json", "--conjugations"]
-        )
-        self.assertEqual(status, 0)
-        payload = json.loads(raw_json)
-        forms = [
-            token.get("conjugations")
-            for token in payload["tokens"]
-            if token.get("dictionary_form")
-        ]
-        self.assertTrue(any("polite" in item for item in forms if item))
-
-    def test_json_examples(self):
+    def test_file_input_writes_timestamped_sibling_html(self):
         with tempfile.TemporaryDirectory() as directory:
-            sentences = Path(directory) / "sentences.tsv"
-            links = Path(directory) / "links.tsv"
-            sentences.write_text(
-                "1\tjpn\t日本語を勉強する。\n2\tcmn\t学习日语。\n",
-                encoding="utf-8",
-            )
-            links.write_text("1\t2\n", encoding="utf-8")
-            status, raw_json, _ = self.invoke(
-                [
-                    "日本語を勉強する。",
-                    "--engine",
-                    "sudachi",
-                    "--format",
-                    "json",
-                    "--sentences",
-                    str(sentences),
-                    "--sentence-links",
-                    str(links),
-                ]
-            )
+            source = Path(directory) / "lesson.txt"
+            source.write_text("日本語を読む", encoding="utf-8")
+            status, _, stderr = self.invoke(["--file", str(source)])
             self.assertEqual(status, 0)
-            payload = json.loads(raw_json)
-            self.assertIn("examples", payload)
-            self.assertIn("日本語", payload["examples"])
-            example = payload["examples"]["日本語"][0]
-            self.assertEqual("日本語を勉強する。", example["text"])
-            self.assertEqual("学习日语。", example["translations"][0])
-
-    def test_export_requires_explicit_parent_and_does_not_overwrite(self):
-        with tempfile.TemporaryDirectory() as directory:
-            target = Path(directory) / "nested" / "lesson.md"
-            status, _, stderr = self.invoke(["日本語を読む", "--output", str(target)])
-            self.assertEqual(status, 2)
-            self.assertIn("输出目录不存在", stderr)
-            self.assertFalse(target.exists())
-
-            status, _, stderr = self.invoke(
-                ["日本語を読む", "--output", str(target), "--create-parent"]
-            )
-            self.assertEqual(status, 0)
-            self.assertTrue(target.exists())
+            outputs = [path for path in Path(directory).iterdir() if path != source]
+            self.assertEqual(len(outputs), 1)
+            target = outputs[0]
+            self.assertRegex(target.name, r"^lesson\.\d{8}-\d{6}(?:-\d+)?\.html$")
+            self.assertIn("<!doctype html>", target.read_text(encoding="utf-8"))
+            self.assertEqual(source.read_text(encoding="utf-8"), "日本語を読む")
             self.assertIn(str(target), stderr)
-
-            status, _, stderr = self.invoke(["日本語を読む", "--output", str(target)])
-            self.assertEqual(status, 2)
-            self.assertIn("输出文件已存在", stderr)
 
     def test_input_sources_cannot_be_combined(self):
         with tempfile.NamedTemporaryFile("w", encoding="utf-8") as handle:
@@ -123,6 +53,16 @@ class CLITests(unittest.TestCase):
             status, _, stderr = self.invoke(["日本語", "--file", handle.name])
         self.assertEqual(status, 2)
         self.assertIn("不能同时使用", stderr)
+
+    def test_cjk_only_text_requires_confirmation_then_warns(self):
+        status, _, stderr = self.invoke(["日本語"])
+        self.assertEqual(status, 2)
+        self.assertIn("日语信号不足", stderr)
+
+        status, result, stderr = self.invoke(["--assume-japanese", "日本語"])
+        self.assertEqual(status, 0)
+        self.assertIn("<ruby>日本語<rt>にほんご</rt></ruby>", result)
+        self.assertIn("已绕过日语检测", stderr)
 
 
 if __name__ == "__main__":
