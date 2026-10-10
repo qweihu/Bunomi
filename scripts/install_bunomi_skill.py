@@ -16,6 +16,7 @@ import sys
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_ITEMS = ("SKILL.md", "PROMPT.md", "agents")
+MIN_PYTHON = (3, 10)
 
 
 def default_destination() -> Path:
@@ -48,6 +49,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--force", action="store_true", help="允许更新已有安装")
     args = parser.parse_args(argv)
     try:
+        if sys.version_info < MIN_PYTHON:
+            raise RuntimeError("Bunomi 需要 Python 3.10 或更高版本")
         target = install(args.destination or default_destination(), force=args.force)
     except (OSError, RuntimeError) as exc:
         print(f"install_bunomi_skill: {exc}", file=sys.stderr)

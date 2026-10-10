@@ -11,8 +11,9 @@ Agent 向けの**日本語ふりがなスキル**です：入力が日本語ら�
 
 - **スキル層**：ルート `SKILL.md` / `PROMPT.md` を Codex・Claude など各 Agent が
   利用；`package.json` はスキルのメタデータ。
-- **エンジン層**：ローカル CLI（`bunomi`）+ Python パッケージ。決定的な読み
-  （Sudachi 優先、PyKakasi フォールバック）、ruby 描画、安全な書き出し。
+- **エンジン層**：ローカル CLI（`bunomi`）+ Python パッケージ。共有コアの
+  Sudachi 読み、ruby 描画、安全な書き出し。PyKakasi は GPL-3.0 の依存を含む
+  任意の比較エンジンとして分離しています。
 - **境界**：歌詞の取得・翻訳・レイアウトは専用の歌詞スキルと共有翻訳スキル
   `$japanese-translation` に任せ、Bunomi は注音だけを行います。
 
@@ -39,62 +40,28 @@ Agent は `$bunomi` を参照して `SKILL.md` のワークフローに従いま
 
 ## 開発者向け（CLI）
 
-```bash
-echo "夢ならばどれほどよかったでしょう" | .venv/bin/bunomi
-.venv/bin/bunomi --file lesson.txt --format html
-.venv/bin/bunomi "日本語を読む" --output ./exports/lesson.md --create-parent
-.venv/bin/bunomi "雨が降り止むまでは帰れない" --engine sudachi
-```
+通常の日本語テキストに決定的な振り仮名を付ける CLI です。
 
-既定は標準出力のみ。書き出しは明示的な `--output` が必要で、上書きには
-`--overwrite` が必要です。`--engine auto` は Sudachi 優先、`--engine pykakasi`
-は互換フォールバック。審査済みのフレーズ上書きは既定で有効、`--no-overrides`
-で診断できます。
+    echo "日本語を読む" | .venv/bin/bunomi
+    .venv/bin/bunomi "日本語を読む" --romaji
+    .venv/bin/bunomi "日本語を読む" --format html
+    .venv/bin/bunomi --file lesson.txt
 
-<p align="center">
-  <img src="screenshot/ja/cli.png" alt="CLI" width="720">
-  <br><sub>ターミナルの Bunomi：標準入力から一行、ruby Markdown が出て下に描画結果</sub>
-</p>
+テキストと標準入力は Ruby 内容を標準出力へ出します。ファイル入力は元ファイルを
+上書きせず、同じフォルダーに時刻付きファイルを作り、既定で HTML を出力します。
+形式は markdown または html を指定できます。
 
-<p align="center">
-  <img src="screenshot/ja/romaji.png" alt="ローマ字モード" width="720">
-  <br><sub>ローマ字モード（--romaji）：すべての仮名をヘボン式ローマ字で出力</sub>
-</p>
-
-JSON 出力には token ごとのメタデータ（品詞・辞書形・標準形）が含まれ、
-`--conjugations` で活用形、`--sentences/--sentence-links` で Tatoeba 例文を
-付与できます。
-
-### 出力形式
-
-<p align="center">
-  <img src="screenshot/ja/card.png" alt="単語カード" width="720">
-  <br><sub>単語カード：品詞・辞書形・活用形・意味を一括で</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/json.png" alt="JSON 出力" width="720">
-  <br><sub>JSON 出力：token ごとの品詞・辞書形・標準形・活用形</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/ja/html.png" alt="HTML 出力" width="720">
-  <br><sub>HTML 出力（--format html）：最小のブラウザドキュメント、ruby をそのまま表示</sub>
-</p>
-
-**中文版 / English 版**：同じ画像が `screenshot/zh/` と `screenshot/en/` に
-あります。生成テンプレートは `scripts/screenshot/showcase.html`。
+言語判定は保守的な文字種ヒューリスティックです。仮名のない入力、または漢字数の
+4 分の 1 未満しか仮名がない入力は曖昧として拒否します。中日で共有される漢字の言語を
+識別したり、混在する文章を自動分割したりはできません。漢字だけの文をユーザーが
+日本語だと明示した場合のみ `--assume-japanese` を使い、CLI の警告も伝えてください。
+翻訳、歌詞検索、歌詞専用レイアウトは別の Skill が担当します。
 
 ## 翻訳
 
-翻訳が求められたら、Bunomi は共有スキル `$japanese-translation`
-（[japanese-language-core](https://github.com/qweihu/japanese-language-core)
-リポジトリ）に引き渡します：
-
-```bash
-git clone https://github.com/qweihu/japanese-language-core.git
-python3 scripts/install_skill.py --force
-```
+Bunomi は一般的な日本語テキストの注音だけを担当します。翻訳は共有の
+[japanese-language-core](https://github.com/qweihu/japanese-language-core) にある
+$japanese-translation Skill に委譲し、Bunomi の出力には含めません。
 
 ## 開発インストール
 
@@ -104,7 +71,8 @@ python3 -m venv .venv
 ```
 
 公開の [japanese-language-core](https://github.com/qweihu/japanese-language-core)
-の `v0.3.0` を参照します（読みには `[reading]` 拡張が必要）。ローカル開発：
+`v0.4.0` の `[reading]` 拡張は Bunomi の依存関係から自動でインストールされます。
+両リポジトリをローカル開発する場合：
 
 ```bash
 .venv/bin/python -m pip install -e "/Users/qwei/Coding/japanese-language-core[reading]"
@@ -123,34 +91,16 @@ PYTHONPATH=src python3 -m unittest discover -s tests -v
 
 ## プロジェクト構成
 
-```text
-SKILL.md                     # スキル入口（リポジトリ＝スキル）
-PROMPT.md                    # スキルなし環境用プロンプト
-package.json                 # スキルメタデータ
-agents/openai.yaml           # Codex UI メタデータ
-docs/requirements.md         # MVP 要件と受入基準
-docs/yomitan-data-plan.md    # Yomitan 辞書の取得・バージョン・監査計画
-src/bunomi/core.py           # 判定・エンジン適応・ruby 描画・検証
-src/bunomi/engine.py         # japanese_language_core.reading の入口
-src/bunomi/cli.py            # CLI と安全な書き出し
-scripts/install_bunomi_skill.py # スキルインストーラ
-scripts/fetch_yomitan_data.py # Yomitan 辞書スナップショット取得
-scripts/audit_yomitan_data.py  # スナップショット検証
-scripts/audit_reading_disagreements.py # エンジンと辞書候補の差分
-tests/test_core.py           # 外部サービス不要のコアテスト
-```
+    SKILL.md       Agent 向け注音手順
+    PROMPT.md      Skill 非対応環境向け Prompt
+    src/bunomi/    日本語判定、共有読音 API、Ruby 描画、検証、CLI
+    scripts/       Skill インストーラー
+    tests/         単体テストと本番監査
 
-## Yomitan 辞書スナップショット
+## 共有言語コア
 
-Yomitan/JMdict データは辞書の証拠・監査入力として使い、既定の文脈読みは
-Sudachi が担当します：
+Bunomi は [japanese-language-core](https://github.com/qweihu/japanese-language-core)
+の読音 API を再利用します。共有コアは日本語の読みと言語共通契約を担当し、
+Bunomi は一般文の判定、Ruby 表示と Agent の流れを担当します。
 
-```bash
-.venv/bin/python scripts/fetch_yomitan_data.py --extract
-.venv/bin/python scripts/audit_yomitan_data.py
-.venv/bin/python scripts/audit_reading_disagreements.py
-```
-
-共有エンジンのソース・テスト・配布メタデータは独立リポジトリにあります。
-データは無視対象の `var/yomitan/` に保存し、`manifest.json` でバージョン管理します。
-詳細は [docs/yomitan-data-plan.md](docs/yomitan-data-plan.md)。
+MIT License

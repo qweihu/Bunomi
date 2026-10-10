@@ -1,4 +1,4 @@
 interface:
   display_name: "Bunomi 日语注音"
-  short_description: "为日语初学者标注汉字读音并生成可校验振假名与对话输出"
-  default_prompt: "Use $bunomi to annotate Japanese kanji with hiragana furigana and validate the ruby output."
+  short_description: "为普通日语文本添加注音并默认生成 HTML"
+  default_prompt: "Use $bunomi for ordinary Japanese text: add validated furigana in hiragana by default; do not translate; return HTML by default."

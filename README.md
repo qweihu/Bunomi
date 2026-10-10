@@ -12,7 +12,9 @@ verifies the result before export. The repository itself is the skill (root
 - **Skill layer**: root `SKILL.md` / `PROMPT.md` for Codex, Claude and other
   agents; `package.json` is the skill metadata.
 - **Engine layer**: local CLI (`bunomi`) + Python package for deterministic
-  readings (Sudachi first, PyKakasi fallback), ruby rendering and safe export.
+  readings (Sudachi through the shared core), ruby rendering and safe export.
+  The optional PyKakasi comparison engine is installed separately because its
+  GPL-3.0 dependency chain is not part of Bunomi's normal runtime.
 - **Boundary**: lyric acquisition, translation and layout belong to dedicated
   lyric skills and the shared `$japanese-translation` skill; Bunomi only
   annotates.
@@ -41,68 +43,29 @@ without a skill framework can use `PROMPT.md` directly.
 
 ## For developers (CLI)
 
-```bash
-echo "夢ならばどれほどよかったでしょう" | .venv/bin/bunomi
-.venv/bin/bunomi --file lesson.txt --format html
-.venv/bin/bunomi "日本語を読む" --output ./exports/lesson.md --create-parent
-.venv/bin/bunomi "雨が降り止むまでは帰れない" --engine sudachi
-```
+The CLI provides deterministic furigana for ordinary Japanese text.
 
-Output goes to stdout by default. Export requires an explicit `--output`;
-overwriting requires `--overwrite`. `--engine auto` prefers Sudachi, and
-`--engine pykakasi` is the compatibility fallback. Reviewed phrase overrides
-are enabled by default; use `--no-overrides` for diagnostics.
+    echo "日本語を読む" | .venv/bin/bunomi
+    .venv/bin/bunomi "日本語を読む" --romaji
+    .venv/bin/bunomi "日本語を読む" --format html
+    .venv/bin/bunomi --file lesson.txt
 
-<p align="center">
-  <img src="screenshot/en/cli.png" alt="CLI" width="720">
-  <br><sub>Bunomi in the terminal: one command in, ruby Markdown out, with rendered result below</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/romaji.png" alt="Romaji mode" width="720">
-  <br><sub>Romaji mode (--romaji): every kana rendered in Hepburn romaji</sub>
-</p>
-
-JSON output carries per-token metadata (POS, dictionary form, normalized
-form) plus optional `--conjugations` and Tatoeba example sentences via
-`--sentences/--sentence-links`.
-
-### Output formats
-
-<p align="center">
-  <img src="screenshot/en/card.png" alt="Word card" width="720">
-  <br><sub>Word card: POS, dictionary form, conjugations and gloss at a glance</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/json.png" alt="JSON output" width="720">
-  <br><sub>JSON output: per-token POS, dictionary form, normalized form and conjugations</sub>
-</p>
-
-<p align="center">
-  <img src="screenshot/en/html.png" alt="HTML output" width="720">
-  <br><sub>HTML output (--format html): a minimal browser document, ruby rendered as-is</sub>
-</p>
-
-**日本語版 / 中文版**: the same images live in `screenshot/ja/` and
-`screenshot/zh/`; the generator template is `scripts/screenshot/showcase.html`.
+Text and stdin print Ruby content to stdout. File input writes a timestamped
+sibling file and defaults to HTML; it never overwrites the source. Use
+--format markdown or --format html to choose a format. Detection is a
+conservative script heuristic: text without kana, or with fewer than one kana
+per four Han characters, is rejected as ambiguous. It cannot distinguish
+Chinese from Japanese Han spans or split such mixed passages automatically.
+If the user explicitly confirms that Han-only text is Japanese, pass
+`--assume-japanese` and preserve its warning. Translation, lyric search, and
+lyric-specific layout belong to other skills.
 
 ## Translation
 
-When the user asks for a translation, Bunomi hands the text to the shared
-`$japanese-translation` skill from the
-[japanese-language-core](https://github.com/qweihu/japanese-language-core)
-repository:
-
-<p align="center">
-  <img src="screenshot/en/pair.png" alt="Furigana + translation" width="720">
-  <br><sub>Annotated lines paired with Chinese translations for learning text</sub>
-</p>
-
-```bash
-git clone https://github.com/qweihu/japanese-language-core.git
-python3 scripts/install_skill.py --force
-```
+Bunomi only annotates ordinary Japanese text. Translation is a separate
+workflow provided by the shared $japanese-translation skill from
+[japanese-language-core](https://github.com/qweihu/japanese-language-core).
+It is not part of Bunomi output.
 
 ## Development install
 
@@ -111,9 +74,9 @@ python3 -m venv .venv
 .venv/bin/python -m pip install -e .
 ```
 
-Installation pulls the shared `japanese-language-core` core pinned at `v0.3.0`
-(reading requires the `[reading]` extra). For local development of both
-repositories:
+Installation pulls `japanese-language-core` pinned at `v0.4.0` with its
+`[reading]` extra, so the reading engines are installed with Bunomi. For local
+development of both repositories:
 
 ```bash
 .venv/bin/python -m pip install -e "/Users/qwei/Coding/japanese-language-core[reading]"
@@ -134,48 +97,17 @@ CLI formats, Japanese detection and export safety; golden cases live in
 
 ## Project structure
 
-```text
-SKILL.md                     # skill entry (the repository is the skill)
-PROMPT.md                    # standalone prompt without a skill framework
-package.json                 # skill metadata
-agents/openai.yaml           # Codex UI metadata
-docs/requirements.md         # MVP requirements and acceptance criteria
-docs/yomitan-data-plan.md    # Yomitan dictionary sources, versions, audit plan
-src/bunomi/core.py           # detection, engine adapters, ruby rendering, validation
-src/bunomi/engine.py         # entry point for japanese_language_core.reading
-src/bunomi/cli.py            # CLI and safe export
-scripts/install_bunomi_skill.py # repeatable skill installer
-scripts/fetch_yomitan_data.py # fetch and register Yomitan dictionary snapshots
-scripts/audit_yomitan_data.py  # verify snapshot integrity and sample indices
-scripts/audit_reading_disagreements.py # engine vs dictionary candidate diff
-tests/test_core.py           # core tests without external services
-```
+    SKILL.md       Agent instructions for ordinary Japanese annotation
+    PROMPT.md      Standalone prompt for agents without Skill support
+    src/bunomi/    Detection, shared reading adapter, ruby rendering, validation and CLI
+    scripts/       Skill installer
+    tests/         Unit tests and production audit
 
-## Yomitan dictionary snapshots
+## Shared language core
 
-Bunomi uses Yomitan/JMdict data as dictionary evidence and audit input;
-Sudachi stays the default contextual reading source:
+Bunomi reuses the reading API from
+[japanese-language-core](https://github.com/qweihu/japanese-language-core).
+The shared core owns Japanese reading and general language contracts; Bunomi
+owns ordinary-text detection, ruby presentation, and its Agent workflow.
 
-<p align="center">
-  <img src="screenshot/en/dict.png" alt="Dictionary audit" width="720">
-  <br><sub>Dictionary audit: candidate readings, tags, JMnedict names and examples</sub>
-</p>
-
-```bash
-.venv/bin/python scripts/fetch_yomitan_data.py --extract
-.venv/bin/python scripts/audit_yomitan_data.py
-.venv/bin/python scripts/audit_reading_disagreements.py
-```
-
-The shared engine's source, tests and distribution metadata live in the
-separate repository:
-
-```bash
-python3 -m pip wheel --no-deps /Users/qwei/Coding/japanese-language-core -w dist/shared-engine
-```
-
-Data is stored under the ignored `var/yomitan/` directory with a versioned
-`manifest.json`. See [docs/yomitan-data-plan.md](docs/yomitan-data-plan.md).
-Shared-boundary notes live in the
-[japanese-language-core](https://github.com/qweihu/japanese-language-core)
-repository documentation.
+MIT License
