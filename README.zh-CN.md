@@ -1,103 +1,116 @@
 # Bunomi
 
-**普通日语文本的注音 Skill**
+**[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md)**
 
-Bunomi 适合处理日语句子、文章、教材、聊天内容等普通文本。它会给汉字加上平假名，默认生成 HTML；Bunomi 流程只负责注音。
+面向普通日语文本的振假名 Skill，适合文章、笔记、消息和学习材料。Bunomi 添加上下文读音，校验注音结果，默认返回可独立打开的 HTML 页面。
 
-## 你可以怎么用
+<p align="center"><img src="screenshot/zh/hiragana.png" alt="上下文 Ruby 注音示例，送假名留在标签外" width="820"><br><sub>注音示例 · 为「降り止む」中的汉字标注读音，り 和 む 保留在 Ruby 外。</sub></p>
 
-直接告诉 Agent：
+## 处理流程
 
-```text
-请给这段日语加平假名：
-日本語を読む
-```
+~~~text
+用户提供文本 → 保守判断文字脚本 → 上下文注音 → 校验 Ruby 和原文 → HTML
+~~~
 
-默认结果是 HTML。你也可以继续说：
-
-- “改成罗马音”；
-- “导出 Markdown”。
+Agent 工作流由仓库根目录的 <code>SKILL.md</code> 定义。安装 Skill 后可直接让 Agent 注音；本地 <code>bunomi</code> 命令是确定性引擎，也可用于脚本和文件处理。
 
 
-## 它处理什么
+## 判断规则与边界
 
-- 普通日语文本的平假名注音；
-- 用户明确要求时的罗马音；
-- 日语检测和注音结果校验；
-- 默认 HTML，按需 Markdown；
-- 保留原文、换行、标点和非日语内容。
+Bunomi 根据日语文字脚本信号判断输入，不是完整的语种识别模型。
 
-它不负责抓取歌词、清洗歌词网页、制作课程或生成学习卡片。
+- 没有平假名或片假名的文本会被视为歧义，默认拒绝处理。
+- 汉字达到 4 个时，如果假名少于每 4 个汉字对应 1 个，也会被视为歧义。
+- 它不能判断纯汉字片段究竟是中文还是日文，也不会自动从中日混合文本中切出日语部分。
+- 如果纯汉字文本确实是日语，用户需要先明确确认。CLI 可使用 <code>--assume-japanese</code> 绕过歧义检查，但结果会保留警告。
 
-## 命令行用法
+语言不明确时，请直接提供其中的日语部分，不要要求 Bunomi 猜测。
 
-```bash
-# 直接输入文本：输出带 Ruby 的内容
+<p align="center"><img src="screenshot/zh/detection.png" alt="只有汉字时暂停确认，出现假名信号后可继续" width="820"><br><sub>识别示例 · 「日本語」有歧义；「これは日本語です。」带有日语文字信号。</sub></p>
+
+## 读音、原文保留与校验
+
+Bunomi 使用 [japanese-language-core](https://github.com/qweihu/japanese-language-core) 的读音 API。普通使用流程不要求用户选择引擎或词典。
+
+- 默认添加平假名振假名；只有用户提出要求时才使用 Hepburn 罗马音。
+- 保留原文、换行、标点、非日语片段和有意义的空行。
+- 送假名留在 Ruby 标签之外。例如「降り止む」只给汉字部分添加读音，り、む仍在原文中。
+- 输出前检查 Ruby 结构、原文是否逐字还原、汉字是否都有读音。检查失败会报告错误，不会静默截断。
+- 词组覆盖规则刻意保持少而透明：降り止む → ふりやむ、私は → わたしは。它不是词典，也不是完整例外表。
+
+<p align="center"><img src="screenshot/zh/overrides.png" alt="两条词组读音及其数据原因" width="820"><br><sub>覆盖数据 · 可以逐项查看维护词组、读音和设置原因。</sub></p>
+
+<p align="center"><img src="screenshot/zh/validation.png" alt="输入、Ruby 输出和四项结构校验" width="820"><br><sub>校验示例 · 检查原文还原、Ruby 完整性、读音覆盖与送假名位置。</sub></p>
+
+## 输出方式
+
+Agent Skill 默认返回独立 HTML，样式与页面一起保存，使用系统字体，不依赖 CDN。需要 Markdown 或罗马音时可直接提出。
+
+CLI 根据输入方式采用不同默认值：
+
+| 输入 | 默认结果 |
+| --- | --- |
+| 文本参数或标准输入 | 在终端输出 Ruby 内容 |
+| UTF-8 文本文件 | 在原文件旁新建带时间戳的 HTML 文件 |
+
+CLI 不会覆盖原文件。处理文件时可通过 <code>--format markdown</code> 或 <code>--format html</code> 指定格式。
+
+<p align="center"><img src="screenshot/zh/html.png" alt="在独立 HTML 页面中显示 Ruby 注音" width="820"><br><sub>HTML 输出 · 打开生成的页面即可查看汉字上方的读音。</sub></p>
+
+~~~bash
+# 输出 Ruby 标记
 echo "日本語を読む" | .venv/bin/bunomi
 
-# 生成 HTML
-.venv/bin/bunomi "日本語を読む" --format html
-
-# 生成罗马音
+# 请求 Hepburn 罗马音
 .venv/bin/bunomi "日本語を読む" --romaji
 
-# 处理文件：在原文件同目录生成带时间戳的新 HTML
+# 在同目录新建带时间戳的 HTML
 .venv/bin/bunomi --file lesson.txt
-```
 
-直接输入时结果输出到终端；处理文件时不会覆盖原文件，例如：
+# 明确要求 Markdown
+.venv/bin/bunomi --file lesson.txt --format markdown
+~~~
 
-```text
-lesson.YYYYMMDD-HHMMSS.html
-```
+<p align="center"><img src="screenshot/zh/romaji.png" alt="默认平假名；明确要求时才输出 Hepburn" width="820"><br><sub>罗马音选项 · 只有用户明确要求时才切换。</sub></p>
 
-命令行只保留日常使用需要的选项，不需要选择引擎、词典、例句、活用或输出路径。
+## 安装 Skill
 
-日语判断是保守的文字脚本启发式：不含假名，或假名少于汉字数四分之一的文本，
-会被判为信号不足。它无法区分中日共用汉字的具体语种，也不会自动切分中日混合段落；
-遇到这类文本时，请先提供明确的日语部分。用户明确确认纯汉字文本是日语后，才可使用
-`--assume-japanese`，并保留命令的警告。
+需要 Python 3.10+：
 
-## 安装
-
-需要 Python 3.10+。
-
-```bash
+~~~bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
-
-# 安装为 Agent Skill
 .venv/bin/python scripts/install_bunomi_skill.py
-```
+~~~
 
-Bunomi 安装时会自动安装固定在 `v0.4.0` 的共享核心及其 `[reading]` 读音依赖。
-共享核心由 [japanese-language-core](https://github.com/qweihu/japanese-language-core) 提供。
-PyKakasi 仅作可选对照引擎，不在 Bunomi 默认安装中；它的 GPL-3.0 依赖链需要单独安装。
+此脚本会把当前仓库安装到 Codex 默认 Skill 目录。替换已有安装时添加 <code>--force</code>。Agent 可调用 <code>$bunomi</code>；没有 Skill 机制时，可直接使用 <code>PROMPT.md</code>。
 
-## 和共享核心的关系
+安装包会带上共享 Core 的读音扩展。可选的 PyKakasi 对照引擎需要单独安装，其依赖链含 GPL-3.0，不属于 Bunomi 默认依赖。
 
-Bunomi 是面向 Agent 的应用层 Skill，负责“普通文本注音”这件事。
+## Bunomi 不负责什么
 
-共享核心是独立的通用库，保留词典、例句、活用和翻译校验等能力，供其他应用按需使用。Bunomi 的用户流程只使用日语读音能力。
+Bunomi 只给普通日语文本注音，不搜索或清理歌词、不翻译、不抓取 URL，也不生成歌词专用排版。它不会声称每个读音都正确：结构校验和少量覆盖规则让行为可检查；无法判断或校验失败的情况仍会明确报告。
 
-## 开发与测试
+## 开发
 
-```bash
-.venv/bin/python -m unittest discover -s tests -v
+~~~bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -e .
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 .venv/bin/python scripts/production_audit.py
-```
+~~~
 
-当前测试和生产审计会检查注音、Ruby 完整性、原文保留、文件时间戳输出和 Skill 结构。
+生产审计覆盖 Skill 结构、黄金读音用例、CLI 格式、日语判断和安全文件输出。
 
 ## 项目结构
 
-```text
-SKILL.md                 # Agent 使用的 Skill 说明
-PROMPT.md                # 没有 Skill 框架时使用的提示词
-src/bunomi/cli.py        # 简化后的命令行入口
-src/bunomi/core.py       # 日语检测、注音和校验
-scripts/install_bunomi_skill.py # 安装 Skill
-tests/                   # 本地回归测试
-```
+~~~text
+SKILL.md                         Agent 工作流
+PROMPT.md                        独立提示词备用方案
+src/bunomi/                      日语判断、Core 适配器、Ruby 渲染、校验和 CLI
+src/bunomi/data/reading_overrides.json
+scripts/install_bunomi_skill.py
+tests/                            单元测试与生产审计
+~~~
 
-MIT License
+MIT 许可证，见 [LICENSE](LICENSE)。

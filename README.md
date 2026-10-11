@@ -1,114 +1,116 @@
 # Bunomi
 
-**[English](README.md) | [简体中文](README.zh-CN.md) | [日本語](README.ja.md)**
+**[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja.md)**
 
-An **Agent-facing Japanese furigana skill**: it decides whether input looks
-like Japanese, adds validated `<ruby>` hiragana/romaji readings to kanji, and
-verifies the result before export. The repository itself is the skill (root
-`SKILL.md`); the CLI is the deterministic engine behind it.
+A Japanese furigana Skill for ordinary text: articles, notes, messages, and learning material. Bunomi adds contextual readings, validates the annotated source, and returns a self-contained HTML page by default.
 
-## What it is
+<p align="center"><img src="screenshot/en/hiragana.png" alt="A contextual Ruby example with okurigana outside the tags" width="820"><br><sub>Reading example · the kanji in 降り止む receive readings; り and む remain outside Ruby.</sub></p>
 
-- **Skill layer**: root `SKILL.md` / `PROMPT.md` for Codex, Claude and other
-  agents; `package.json` is the skill metadata.
-- **Engine layer**: local CLI (`bunomi`) + Python package for deterministic
-  readings (Sudachi through the shared core), ruby rendering and safe export.
-  The optional PyKakasi comparison engine is installed separately because its
-  GPL-3.0 dependency chain is not part of Bunomi's normal runtime.
-- **Boundary**: lyric acquisition, translation and layout belong to dedicated
-  lyric skills and the shared `$japanese-translation` skill; Bunomi only
-  annotates.
+## How it works
 
-<p align="center">
-  <img src="screenshot/en/hiragana.png" alt="Hiragana furigana" width="720">
-  <br><sub>Hiragana furigana: contextual readings (降り止む → ふりやむ) with okurigana outside ruby</sub>
-</p>
+~~~text
+User-provided text → conservative script check → contextual readings → Ruby/source validation → HTML
+~~~
 
-## For agents
+The Skill workflow uses the repository's root <code>SKILL.md</code>. Install the Skill and ask an Agent to annotate the text. The local <code>bunomi</code> CLI is the deterministic engine for direct input, scripts, and file processing.
 
-Install into the Codex default skill directory (add `--force` when the skill
-already exists):
 
-```bash
-.venv/bin/python scripts/install_bunomi_skill.py
-```
+## Detection rules and limits
 
-Agents reference `$bunomi` and follow the `SKILL.md` workflow; environments
-without a skill framework can use `PROMPT.md` directly.
+Bunomi uses Japanese script signals; it is not a full language-identification model.
 
-<p align="center">
-  <img src="screenshot/en/flow.png" alt="Workflow" width="720">
-  <br><sub>Workflow: input → detection → annotation → validation → output/export</sub>
-</p>
+- Text without hiragana or katakana is ambiguous and rejected by default.
+- If text contains at least four Han characters, fewer than one kana per four Han characters is also treated as ambiguous.
+- It cannot tell whether a Han-only span is Chinese or Japanese, or automatically split Japanese and Chinese spans in mixed text.
+- If an ambiguous Han-only passage is Japanese, the user must confirm that first. The CLI escape hatch is <code>--assume-japanese</code>; it keeps a warning in the result.
 
-## For developers (CLI)
+When language is unclear, provide the Japanese portion explicitly instead of asking Bunomi to infer it.
 
-The CLI provides deterministic furigana for ordinary Japanese text.
+<p align="center"><img src="screenshot/en/detection.png" alt="Han-only input pauses for confirmation while kana signals permit annotation" width="820"><br><sub>Detection example · 日本語 is ambiguous without kana; これは日本語です。 provides a Japanese script signal.</sub></p>
 
-    echo "日本語を読む" | .venv/bin/bunomi
-    .venv/bin/bunomi "日本語を読む" --romaji
-    .venv/bin/bunomi "日本語を読む" --format html
-    .venv/bin/bunomi --file lesson.txt
+## Readings, preservation, and validation
 
-Text and stdin print Ruby content to stdout. File input writes a timestamped
-sibling file and defaults to HTML; it never overwrites the source. Use
---format markdown or --format html to choose a format. Detection is a
-conservative script heuristic: text without kana, or with fewer than one kana
-per four Han characters, is rejected as ambiguous. It cannot distinguish
-Chinese from Japanese Han spans or split such mixed passages automatically.
-If the user explicitly confirms that Han-only text is Japanese, pass
-`--assume-japanese` and preserve its warning. Translation, lyric search, and
-lyric-specific layout belong to other skills.
+Bunomi uses the reading API from [japanese-language-core](https://github.com/qweihu/japanese-language-core). The application does not expose engine or dictionary selection.
 
-## Translation
+- Hiragana furigana is the default; Hepburn romaji is used only when requested.
+- Original text, line breaks, punctuation, non-Japanese fragments, and meaningful blank lines are preserved.
+- Okurigana remains outside the Ruby span; for example, the reading of 降り止む is attached to the kanji while り and む stay in the source text.
+- Before output, checks verify Ruby structure, exact source reconstruction, and reading coverage for kanji. A failed check is reported; the result is not silently truncated.
+- Phrase overrides are deliberately small and reviewable: 降り止む → ふりやむ and 私は → わたしは. This list is not a dictionary or a complete set of exceptions.
 
-Bunomi only annotates ordinary Japanese text. Translation is a separate
-workflow provided by the shared $japanese-translation skill from
-[japanese-language-core](https://github.com/qweihu/japanese-language-core).
-It is not part of Bunomi output.
+<p align="center"><img src="screenshot/en/overrides.png" alt="Two phrase readings with their reasons in the override data" width="820"><br><sub>Override data · inspect the phrase, reading, and reason for each maintained exception.</sub></p>
 
-## Development install
+<p align="center"><img src="screenshot/en/validation.png" alt="Input, Ruby output, and four structural checks" width="820"><br><sub>Validation example · exact source reconstruction, balanced Ruby, reading coverage, and okurigana placement.</sub></p>
 
-```bash
+## Output modes
+
+The Agent Skill returns self-contained HTML by default. It uses local styles and system fonts, with no CDN. Ask for Markdown or romaji when needed.
+
+The CLI has two defaults:
+
+| Input | Default result |
+| --- | --- |
+| Text argument or stdin | Ruby content printed to the terminal |
+| UTF-8 text file | A new, timestamped HTML file beside the source |
+
+The CLI never overwrites the input file. Use <code>--format markdown</code> or <code>--format html</code> to choose the file format.
+
+<p align="center"><img src="screenshot/en/html.png" alt="A standalone HTML reading view with Ruby rendered" width="820"><br><sub>HTML output · open the generated page to see the readings over their kanji.</sub></p>
+
+~~~bash
+# Print Ruby markup
+echo "日本語を読む" | .venv/bin/bunomi
+
+# Request Hepburn readings
+.venv/bin/bunomi "日本語を読む" --romaji
+
+# Create a timestamped HTML sibling file
+.venv/bin/bunomi --file lesson.txt
+
+# Explicitly request Markdown
+.venv/bin/bunomi --file lesson.txt --format markdown
+~~~
+
+<p align="center"><img src="screenshot/en/romaji.png" alt="Hiragana by default and Hepburn only when requested" width="820"><br><sub>Romaji option · the alternate output appears only after an explicit request.</sub></p>
+
+## Install the Skill
+
+Python 3.10+:
+
+~~~bash
 python3 -m venv .venv
 .venv/bin/python -m pip install -e .
-```
+.venv/bin/python scripts/install_bunomi_skill.py
+~~~
 
-Installation pulls `japanese-language-core` pinned at `v0.4.0` with its
-`[reading]` extra, so the reading engines are installed with Bunomi. For local
-development of both repositories:
+This installs the repository as an Agent Skill in the default Codex skill directory. Add <code>--force</code> when replacing an existing installation. Agents can invoke <code>$bunomi</code>; use <code>PROMPT.md</code> in environments without Skill support.
 
-```bash
-git clone https://github.com/qweihu/japanese-language-core.git ../japanese-language-core
-.venv/bin/python -m pip install -e "../japanese-language-core[reading]"
-.venv/bin/python -m pip install -e . --no-deps
-```
+The package installs the shared Core reading extra. The optional PyKakasi comparison engine is separate and its dependency chain includes GPL-3.0; it is not part of Bunomi's default installation.
 
-## Testing
+## What Bunomi does not do
 
-```bash
-PYTHONPATH=src python3 -m unittest discover -s tests -v
+Bunomi annotates ordinary Japanese text. It does not search for or clean lyrics, translate, fetch URLs, or create lyric layouts. Those are separate workflows. It also does not claim that every reading is correct; structural checks and a small override list make behavior inspectable, while ambiguous or unvalidated cases remain visible.
+
+## Develop
+
+~~~bash
+python3 -m venv .venv
+.venv/bin/python -m pip install -e .
+PYTHONPATH=src .venv/bin/python -m unittest discover -s tests -v
 .venv/bin/python scripts/production_audit.py
-```
+~~~
 
-The production audit additionally checks skill structure, golden readings,
-CLI formats, Japanese detection and export safety; golden cases live in
-`tests/fixtures/golden_cases.json`. See
-[docs/production-audit.md](docs/production-audit.md) for the latest results.
+The production audit covers Skill structure, golden reading cases, CLI formats, detection behavior, and safe file output.
 
 ## Project structure
 
-    SKILL.md       Agent instructions for ordinary Japanese annotation
-    PROMPT.md      Standalone prompt for agents without Skill support
-    src/bunomi/    Detection, shared reading adapter, ruby rendering, validation and CLI
-    scripts/       Skill installer
-    tests/         Unit tests and production audit
+~~~text
+SKILL.md                         Agent workflow
+PROMPT.md                        Standalone prompt fallback
+src/bunomi/                      Detection, Core adapter, Ruby rendering, validation, CLI
+src/bunomi/data/reading_overrides.json
+scripts/install_bunomi_skill.py
+tests/                            Unit and production-audit checks
+~~~
 
-## Shared language core
-
-Bunomi reuses the reading API from
-[japanese-language-core](https://github.com/qweihu/japanese-language-core).
-The shared core owns Japanese reading and general language contracts; Bunomi
-owns ordinary-text detection, ruby presentation, and its Agent workflow.
-
-MIT License
+MIT License. See [LICENSE](LICENSE).
